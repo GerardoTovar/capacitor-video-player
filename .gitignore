@@ -63,3 +63,7 @@ captures
 
 site
 dist
+
+# Android build artifacts
+android/build/
+android/.project
