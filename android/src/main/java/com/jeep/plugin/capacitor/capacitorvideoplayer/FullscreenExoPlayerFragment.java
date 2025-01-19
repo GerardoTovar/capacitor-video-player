@@ -565,10 +565,10 @@ public class FullscreenExoPlayerFragment extends Fragment {
     Map<String, Object> info = new HashMap<String, Object>() {
       {
         put("dismiss", "1");
-        put("currentTime", getCurrentTime());
       }
     };
     if (player != null) {
+      info.put("currentTime", getCurrentTime());
       player.seekTo(0);
       player.setVolume(curVolume);
     }
