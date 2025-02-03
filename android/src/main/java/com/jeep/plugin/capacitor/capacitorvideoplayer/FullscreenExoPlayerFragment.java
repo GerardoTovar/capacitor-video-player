@@ -370,7 +370,7 @@ public class FullscreenExoPlayerFragment extends Fragment {
       };
 
     if (isTV) {
-      Toast.makeText(context, "Device is a TV ", Toast.LENGTH_SHORT).show();
+      // Toast.makeText(context, "Device is a TV ", Toast.LENGTH_SHORT).show();
     }
 
     if (!isInternal) {
