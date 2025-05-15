@@ -1,5 +1,4 @@
 # node files
-dist
 node_modules
 
 # iOS files
@@ -62,7 +61,6 @@ captures
 .vscode/
 
 site
-dist
 
 # Android build artifacts
 android/build/
