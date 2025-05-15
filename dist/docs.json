@@ -1,0 +1,686 @@
+{
+  "api": {
+    "name": "CapacitorVideoPlayerPlugin",
+    "slug": "capacitorvideoplayerplugin",
+    "docs": "",
+    "tags": [],
+    "methods": [
+      {
+        "name": "echo",
+        "signature": "(options: capEchoOptions) => Promise<capVideoPlayerResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "capEchoOptions"
+          }
+        ],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "Echo",
+        "complexTypes": [
+          "capVideoPlayerResult",
+          "capEchoOptions"
+        ],
+        "slug": "echo"
+      },
+      {
+        "name": "initPlayer",
+        "signature": "(options: capVideoPlayerOptions) => Promise<capVideoPlayerResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "capVideoPlayerOptions"
+          }
+        ],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "Initialize a video player",
+        "complexTypes": [
+          "capVideoPlayerResult",
+          "capVideoPlayerOptions"
+        ],
+        "slug": "initplayer"
+      },
+      {
+        "name": "isPlaying",
+        "signature": "(options: capVideoPlayerIdOptions) => Promise<capVideoPlayerResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "capVideoPlayerIdOptions"
+          }
+        ],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "Return if a given playerId is playing",
+        "complexTypes": [
+          "capVideoPlayerResult",
+          "capVideoPlayerIdOptions"
+        ],
+        "slug": "isplaying"
+      },
+      {
+        "name": "play",
+        "signature": "(options: capVideoPlayerIdOptions) => Promise<capVideoPlayerResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "capVideoPlayerIdOptions"
+          }
+        ],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "Play the current video from a given playerId",
+        "complexTypes": [
+          "capVideoPlayerResult",
+          "capVideoPlayerIdOptions"
+        ],
+        "slug": "play"
+      },
+      {
+        "name": "pause",
+        "signature": "(options: capVideoPlayerIdOptions) => Promise<capVideoPlayerResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "capVideoPlayerIdOptions"
+          }
+        ],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "Pause the current video from a given playerId",
+        "complexTypes": [
+          "capVideoPlayerResult",
+          "capVideoPlayerIdOptions"
+        ],
+        "slug": "pause"
+      },
+      {
+        "name": "getDuration",
+        "signature": "(options: capVideoPlayerIdOptions) => Promise<capVideoPlayerResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "capVideoPlayerIdOptions"
+          }
+        ],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "Get the duration of the current video from a given playerId",
+        "complexTypes": [
+          "capVideoPlayerResult",
+          "capVideoPlayerIdOptions"
+        ],
+        "slug": "getduration"
+      },
+      {
+        "name": "getCurrentTime",
+        "signature": "(options: capVideoPlayerIdOptions) => Promise<capVideoPlayerResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "capVideoPlayerIdOptions"
+          }
+        ],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "Get the current time of the current video from a given playerId",
+        "complexTypes": [
+          "capVideoPlayerResult",
+          "capVideoPlayerIdOptions"
+        ],
+        "slug": "getcurrenttime"
+      },
+      {
+        "name": "setCurrentTime",
+        "signature": "(options: capVideoTimeOptions) => Promise<capVideoPlayerResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "capVideoTimeOptions"
+          }
+        ],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "Set the current time to seek the current video to from a given playerId",
+        "complexTypes": [
+          "capVideoPlayerResult",
+          "capVideoTimeOptions"
+        ],
+        "slug": "setcurrenttime"
+      },
+      {
+        "name": "getVolume",
+        "signature": "(options: capVideoPlayerIdOptions) => Promise<capVideoPlayerResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "capVideoPlayerIdOptions"
+          }
+        ],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "Get the volume of the current video from a given playerId",
+        "complexTypes": [
+          "capVideoPlayerResult",
+          "capVideoPlayerIdOptions"
+        ],
+        "slug": "getvolume"
+      },
+      {
+        "name": "setVolume",
+        "signature": "(options: capVideoVolumeOptions) => Promise<capVideoPlayerResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "capVideoVolumeOptions"
+          }
+        ],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "Set the volume of the current video to from a given playerId",
+        "complexTypes": [
+          "capVideoPlayerResult",
+          "capVideoVolumeOptions"
+        ],
+        "slug": "setvolume"
+      },
+      {
+        "name": "getMuted",
+        "signature": "(options: capVideoPlayerIdOptions) => Promise<capVideoPlayerResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "capVideoPlayerIdOptions"
+          }
+        ],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "Get the muted of the current video from a given playerId",
+        "complexTypes": [
+          "capVideoPlayerResult",
+          "capVideoPlayerIdOptions"
+        ],
+        "slug": "getmuted"
+      },
+      {
+        "name": "setMuted",
+        "signature": "(options: capVideoMutedOptions) => Promise<capVideoPlayerResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "capVideoMutedOptions"
+          }
+        ],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "Set the muted of the current video to from a given playerId",
+        "complexTypes": [
+          "capVideoPlayerResult",
+          "capVideoMutedOptions"
+        ],
+        "slug": "setmuted"
+      },
+      {
+        "name": "setRate",
+        "signature": "(options: capVideoRateOptions) => Promise<capVideoPlayerResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "capVideoRateOptions"
+          }
+        ],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "Set the rate of the current video from a given playerId",
+        "complexTypes": [
+          "capVideoPlayerResult",
+          "capVideoRateOptions"
+        ],
+        "slug": "setrate"
+      },
+      {
+        "name": "getRate",
+        "signature": "(options: capVideoPlayerIdOptions) => Promise<capVideoPlayerResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "capVideoPlayerIdOptions"
+          }
+        ],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "Get the rate of the current video from a given playerId",
+        "complexTypes": [
+          "capVideoPlayerResult",
+          "capVideoPlayerIdOptions"
+        ],
+        "slug": "getrate"
+      },
+      {
+        "name": "stopAllPlayers",
+        "signature": "() => Promise<capVideoPlayerResult>",
+        "parameters": [],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "Stop all players playing",
+        "complexTypes": [
+          "capVideoPlayerResult"
+        ],
+        "slug": "stopallplayers"
+      },
+      {
+        "name": "showController",
+        "signature": "() => Promise<capVideoPlayerResult>",
+        "parameters": [],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "Show controller",
+        "complexTypes": [
+          "capVideoPlayerResult"
+        ],
+        "slug": "showcontroller"
+      },
+      {
+        "name": "isControllerIsFullyVisible",
+        "signature": "() => Promise<capVideoPlayerResult>",
+        "parameters": [],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "isControllerIsFullyVisible",
+        "complexTypes": [
+          "capVideoPlayerResult"
+        ],
+        "slug": "iscontrollerisfullyvisible"
+      },
+      {
+        "name": "exitPlayer",
+        "signature": "() => Promise<capVideoPlayerResult>",
+        "parameters": [],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "Exit player",
+        "complexTypes": [
+          "capVideoPlayerResult"
+        ],
+        "slug": "exitplayer"
+      }
+    ],
+    "properties": []
+  },
+  "interfaces": [
+    {
+      "name": "capVideoPlayerResult",
+      "slug": "capvideoplayerresult",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "result",
+          "tags": [],
+          "docs": "result set to true when successful else false",
+          "complexTypes": [],
+          "type": "boolean | undefined"
+        },
+        {
+          "name": "method",
+          "tags": [],
+          "docs": "method name",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "value",
+          "tags": [],
+          "docs": "value returned",
+          "complexTypes": [],
+          "type": "any"
+        },
+        {
+          "name": "message",
+          "tags": [],
+          "docs": "message string",
+          "complexTypes": [],
+          "type": "string | undefined"
+        }
+      ]
+    },
+    {
+      "name": "capEchoOptions",
+      "slug": "capechooptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "value",
+          "tags": [],
+          "docs": "String to be echoed",
+          "complexTypes": [],
+          "type": "string | undefined"
+        }
+      ]
+    },
+    {
+      "name": "capVideoPlayerOptions",
+      "slug": "capvideoplayeroptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "mode",
+          "tags": [],
+          "docs": "Player mode\n - \"fullscreen\"\n - \"embedded\" (Web only)",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "url",
+          "tags": [],
+          "docs": "The url of the video to play",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "subtitle",
+          "tags": [],
+          "docs": "The url of subtitle associated with the video",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "language",
+          "tags": [],
+          "docs": "The language of subtitle\nsee https://github.com/libyal/libfwnt/wiki/Language-Code-identifiers",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "subtitleOptions",
+          "tags": [],
+          "docs": "SubTitle Options",
+          "complexTypes": [
+            "SubTitleOptions"
+          ],
+          "type": "SubTitleOptions"
+        },
+        {
+          "name": "playerId",
+          "tags": [],
+          "docs": "Id of DIV Element parent of the player",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "rate",
+          "tags": [],
+          "docs": "Initial playing rate",
+          "complexTypes": [],
+          "type": "number | undefined"
+        },
+        {
+          "name": "exitOnEnd",
+          "tags": [],
+          "docs": "Exit on VideoEnd (iOS, Android)\ndefault: true",
+          "complexTypes": [],
+          "type": "boolean | undefined"
+        },
+        {
+          "name": "loopOnEnd",
+          "tags": [],
+          "docs": "Loop on VideoEnd when exitOnEnd false (iOS, Android)\ndefault: false",
+          "complexTypes": [],
+          "type": "boolean | undefined"
+        },
+        {
+          "name": "pipEnabled",
+          "tags": [],
+          "docs": "Picture in Picture Enable (iOS, Android)\ndefault: true",
+          "complexTypes": [],
+          "type": "boolean | undefined"
+        },
+        {
+          "name": "bkmodeEnabled",
+          "tags": [],
+          "docs": "Background Mode Enable (iOS, Android)\ndefault: true",
+          "complexTypes": [],
+          "type": "boolean | undefined"
+        },
+        {
+          "name": "showControls",
+          "tags": [],
+          "docs": "Show Controls Enable (iOS, Android)\ndefault: true",
+          "complexTypes": [],
+          "type": "boolean | undefined"
+        },
+        {
+          "name": "displayMode",
+          "tags": [],
+          "docs": "Display Mode [\"all\", \"portrait\", \"landscape\"] (iOS, Android)\ndefault: \"all\"",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "componentTag",
+          "tags": [],
+          "docs": "Component Tag or DOM Element Tag (React app)",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "width",
+          "tags": [],
+          "docs": "Player Width (mode \"embedded\" only)",
+          "complexTypes": [],
+          "type": "number | undefined"
+        },
+        {
+          "name": "height",
+          "tags": [],
+          "docs": "Player height (mode \"embedded\" only)",
+          "complexTypes": [],
+          "type": "number | undefined"
+        },
+        {
+          "name": "headers",
+          "tags": [],
+          "docs": "Headers for the request (iOS, Android)\nby Manuel García Marín (https://github.com/PhantomPainX)",
+          "complexTypes": [],
+          "type": "{ [key: string]: string; } | undefined"
+        },
+        {
+          "name": "title",
+          "tags": [],
+          "docs": "Title shown in the player (Android)\nby Manuel García Marín (https://github.com/PhantomPainX)",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "smallTitle",
+          "tags": [],
+          "docs": "Subtitle shown below the title in the player (Android)\nby Manuel García Marín (https://github.com/PhantomPainX)",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "accentColor",
+          "tags": [],
+          "docs": "ExoPlayer Progress Bar and Spinner color (Android)\nby Manuel García Marín (https://github.com/PhantomPainX)\nMust be a valid hex color code\ndefault: #FFFFFF",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "chromecast",
+          "tags": [],
+          "docs": "Chromecast enable/disable (Android)\nby Manuel García Marín (https://github.com/PhantomPainX)\ndefault: true",
+          "complexTypes": [],
+          "type": "boolean | undefined"
+        },
+        {
+          "name": "artwork",
+          "tags": [],
+          "docs": "Artwork url to be shown in Chromecast player\nby Manuel García Marín (https://github.com/PhantomPainX)\ndefault: \"\"",
+          "complexTypes": [],
+          "type": "string | undefined"
+        }
+      ]
+    },
+    {
+      "name": "SubTitleOptions",
+      "slug": "subtitleoptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "foregroundColor",
+          "tags": [],
+          "docs": "Foreground Color in RGBA (default rgba(255,255,255,1)",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "backgroundColor",
+          "tags": [],
+          "docs": "Background Color in RGBA (default rgba(0,0,0,1)",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "fontSize",
+          "tags": [],
+          "docs": "Font Size in pixels (default 16)",
+          "complexTypes": [],
+          "type": "number | undefined"
+        }
+      ]
+    },
+    {
+      "name": "capVideoPlayerIdOptions",
+      "slug": "capvideoplayeridoptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "playerId",
+          "tags": [],
+          "docs": "Id of DIV Element parent of the player",
+          "complexTypes": [],
+          "type": "string | undefined"
+        }
+      ]
+    },
+    {
+      "name": "capVideoTimeOptions",
+      "slug": "capvideotimeoptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "playerId",
+          "tags": [],
+          "docs": "Id of DIV Element parent of the player",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "seektime",
+          "tags": [],
+          "docs": "Video time value you want to seek to",
+          "complexTypes": [],
+          "type": "number | undefined"
+        }
+      ]
+    },
+    {
+      "name": "capVideoVolumeOptions",
+      "slug": "capvideovolumeoptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "playerId",
+          "tags": [],
+          "docs": "Id of DIV Element parent of the player",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "volume",
+          "tags": [],
+          "docs": "Volume value between [0 - 1]",
+          "complexTypes": [],
+          "type": "number | undefined"
+        }
+      ]
+    },
+    {
+      "name": "capVideoMutedOptions",
+      "slug": "capvideomutedoptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "playerId",
+          "tags": [],
+          "docs": "Id of DIV Element parent of the player",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "muted",
+          "tags": [],
+          "docs": "Muted value true or false",
+          "complexTypes": [],
+          "type": "boolean | undefined"
+        }
+      ]
+    },
+    {
+      "name": "capVideoRateOptions",
+      "slug": "capvideorateoptions",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "playerId",
+          "tags": [],
+          "docs": "Id of DIV Element parent of the player",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "rate",
+          "tags": [],
+          "docs": "Rate value",
+          "complexTypes": [],
+          "type": "number | undefined"
+        }
+      ]
+    }
+  ],
+  "enums": [],
+  "typeAliases": [],
+  "pluginConfigs": []
+}
