@@ -252,14 +252,21 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
             // 2) Añadir al view principal
             DispatchQueue.main.async {
                 self.bridge?.viewController?.view.layer.addSublayer(playerLayer)
+                
+                // Log previo
+                print("📥 [initPlayer] Antes: embeddedPlayers =", Array(self.embeddedPlayers.keys))
+                
+                // Guardado
+                self.embeddedPlayers[playerId] = (player, playerLayer)
                 player.play()
-                // 3) Resolver
+                
+                // Log posterior
+                print("✅ [initPlayer] Después: embeddedPlayers =", Array(self.embeddedPlayers.keys))
+                
                 call.resolve([
                     "method": "initPlayer",
                     "result": true
                 ])
-                // 4) Guardar referencias para poder pausar/detener luego
-                self.embeddedPlayers[playerId] = (player, playerLayer)
             }
             return
         }
@@ -271,7 +278,7 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
             call.reject("Debe indicar playerId")
             return
         }
-
+        print("📤 [removePlayer] embeddedPlayers disponibles =", Array(self.embeddedPlayers.keys))
         // 1) Fullscreen
         if self.mode == "fullscreen", playerId == self.fsPlayerId {
             DispatchQueue.main.async {
