@@ -133,6 +133,7 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
         }
         self.fsPlayerId = playerId
         self.mode = mode
+        print("⚙️ [initPlayer] mode asignado:", mode, "playerId:", playerId)
         self.videoRate = mRate
         self.exitOnEnd = exitOnEnd
         self.loopOnEnd = loopOnEnd
@@ -229,6 +230,7 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
                     title: title,
                     smallTitle: smallTitle,
                     artwork: artwork)
+                print("🖥 [createFullscreen] creada videoPlayerFullScreenView con ID=\(self.fsPlayerId)")
 
             }
         } else if mode == "embedded" {
