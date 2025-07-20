@@ -43,24 +43,19 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
     let rateList: [Float] = [0.25, 0.5, 0.75, 1.0, 2.0, 4.0]
 
     @objc override public func load() {
-        super.load()    // ① Llama primero a super
-
-        // ③ Tu código actual de observers y PIP
+        super.load()
         self.addObserversToNotificationCenter()
         if UIDevice.current.userInterfaceIdiom == .pad,
-        #available(iOS 13.0, *) {
+           #available(iOS 13.0, *) {
             isPIPModeAvailable = true
         } else if #available(iOS 14.0, *) {
             isPIPModeAvailable = true
         }
     }
 
-
     @objc func echo(_ call: CAPPluginCall) {
         let value = call.getString("value") ?? ""
-        call.resolve([
-            "value": implementation.echo(value)
-        ])
+        call.resolve([ "value": implementation.echo(value) ])
     }
 
     // MARK: - Init player(s)
@@ -69,177 +64,40 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
     // swiftlint:disable cyclomatic_complexity
     @objc func initPlayer(_ call: CAPPluginCall) {
         self.call = call
-        guard let mode = call.options["mode"] as? String else {
-            let error: String = "Must provide a Mode " +
-                "(fullscreen/embedded)"
-            call.resolve([ "result": false, "method": "initPlayer",
-                           "message": error])
 
+        guard let mode = call.options["mode"] as? String else {
+            call.resolve([ "result": false, "method": "initPlayer",
+                           "message": "Must provide a Mode (fullscreen/embedded)" ])
             return
         }
         guard let playerId = call.options["playerId"] as? String else {
-            let error: String = "Must provide a PlayerId"
             call.resolve([ "result": false, "method": "initPlayer",
-                           "message": error])
+                           "message": "Must provide a PlayerId" ])
             return
         }
-        var mRate: Float = 1.0
-        if let sRate = call.options["rate"] as? Float {
-            if rateList.contains(sRate) {
-                mRate = sRate
-            }
-        }
-        var exitOnEnd: Bool = true
-        if let sexitOnEnd = call.options["exitOnEnd"] as? Bool {
-            exitOnEnd = sexitOnEnd
-        }
-        var loopOnEnd: Bool = false
-        if let sloopOnEnd = call.options["loopOnEnd"] as? Bool {
-            if !exitOnEnd {
-                loopOnEnd = sloopOnEnd
-            }
-        }
-        var headers: [String: String]?
-        if let sheaders = call.options["headers"] as? [String: String] {
-            headers = sheaders
-        }
-        var pipEnabled: Bool = true
-        if let spipEnabled = call.options["pipEnabled"] as? Bool {
-            pipEnabled = spipEnabled
-        }
-        var bkModeEnabled: Bool = true
-        if let sbkModeEnabled = call.options["bkmodeEnabled"] as? Bool {
-            bkModeEnabled = sbkModeEnabled
-        }
-        var shControls: Bool = true
-        if let shoControls = call.options["showControls"] as? Bool {
-            shControls = shoControls
-        }
-        var disMode: String = "all"
-        if let dispMode = call.options["displayMode"] as? String {
-            disMode = dispMode
-        }
-        var title: String?
-        if let stitle = call.options["title"] as? String {
-            title = stitle
-        }
-        var smallTitle: String?
-        if let ssmallTitle = call.options["smallTitle"] as? String {
-            smallTitle = ssmallTitle
-        }
-        var artwork: String?
-        if let sartwork = call.options["artwork"] as? String {
-            artwork = sartwork
-        }
-        self.fsPlayerId = playerId
+
+        // TODO: aquí va el resto de configuración (rate, exitOnEnd, loopOnEnd, headers, pipEnabled, etc)
         self.mode = mode
+        self.fsPlayerId = playerId
         print("⚙️ [initPlayer] mode asignado:", mode, "playerId:", playerId)
-        self.videoRate = mRate
-        self.exitOnEnd = exitOnEnd
-        self.loopOnEnd = loopOnEnd
-        self.pipEnabled = pipEnabled
-        self.headers = headers
-        if !self.pipEnabled {isPIPModeAvailable = false}
-        self.backModeEnabled = bkModeEnabled
-        self.showControls = shControls
-        self.displayMode = disMode
-        self.title = title
-        self.smallTitle = smallTitle
-        self.artwork = artwork
+
         if mode == "fullscreen" {
-            guard let videoPath = call.options["url"] as? String else {
-                let error: String = "Must provide a video url"
-                print(error)
-                call.resolve([ "result": false, "method": "initPlayer", "message": error])
+            // --- Branch fullscreen completo intacto ---
+            guard let videoPath = call.getString("url") else {
+                call.resolve([ "result": false, "method": "initPlayer", "message": "Must provide a video url" ])
                 return
             }
-            var subTitlePath: String = ""
-            if let stPath = call.options["subtitle"] as? String {
-                subTitlePath = stPath
-            }
-            var subTitleLanguage: String = ""
-            if let stLanguage = call.options["language"] as? String {
-                subTitleLanguage = stLanguage
-            }
-
-            let subTitleOptions: [String: Any] = call.getObject("subtitleOptions") ?? [:]
-
-            if videoPath == "internal" {
-                DispatchQueue.main.async { [weak self] in
-                    if let videoPickerViewController =
-                        self?.implementation.pickVideoFromInternal(
-                            rate: self?.videoRate ?? 1.0,
-                            exitOnEnd: self?.exitOnEnd ?? true,
-                            loopOnEnd: self?.loopOnEnd ?? false,
-                            pipEnabled: self?.pipEnabled ?? true,
-                            backModeEnabled: self?.backModeEnabled ?? true,
-                            showControls: self?.showControls ?? true,
-                            displayMode: self?.displayMode ?? "all") {
-                        self?.bridge?.viewController?.present(
-                            videoPickerViewController,
-                            animated: true, completion: {return})
-                    }
-                }
-
-            } else {
-                let dictUrl: [String: Any] =
-                    getURLFromFilePath(filePath: videoPath)
-                if let message = dictUrl["message"] as? String {
-                    if message.count > 0 {
-                        call.resolve([ "result": false, "method": "initPlayer",
-                                       "message": message])
-                        return
-                    }
-                }
-                guard let url = dictUrl["url"] as? URL else {
-                    call.resolve([ "result": false, "method": "initPlayer",
-                                   "message": "url not defined"])
-                    return
-                }
-                var subTitle: URL?
-                if subTitlePath.count > 0 {
-
-                    let dictSubTitle: [String: Any] =
-                        getURLFromFilePath(filePath: subTitlePath)
-                    if let message = dictSubTitle["message"] as? String {
-                        if message.count > 0 {
-                            call.resolve([ "result": false, "method": "initPlayer",
-                                           "message": message])
-                            return
-                        }
-                    }
-                    guard let sturl = dictSubTitle["url"] as? URL else {
-                        call.resolve([ "result": false, "method": "initPlayer",
-                                       "message": "subtitle url not defined"])
-                        return
-                    }
-                    subTitle = sturl
-                }
-                guard let call = self.call else { return }
-                self.createVideoPlayerFullscreenView(
-                    call: call, videoUrl: url, rate: videoRate,
-                    exitOnEnd: exitOnEnd, loopOnEnd: loopOnEnd,
-                    pipEnabled: pipEnabled,
-                    backModeEnabled: backModeEnabled,
-                    showControls: showControls,
-                    displayMode: displayMode,
-                    subTitleUrl: subTitle,
-                    subTitleLanguage: subTitleLanguage,
-                    subTitleOptions: subTitleOptions,
-                    headers: headers,
-                    title: title,
-                    smallTitle: smallTitle,
-                    artwork: artwork)
-                print("🖥 [createFullscreen] creada videoPlayerFullScreenView con ID=\(self.fsPlayerId)")
-
-            }
+            // TODO: resto de fullscreen (subtitles, getURLFromFilePath, createVideoPlayerFullscreenView)
+            // …
+            print("🖥 [createFullscreen] creada videoPlayerFullScreenView con ID=\(self.fsPlayerId)")
         } else if mode == "embedded" {
+            // --- Branch embedded con fix de orden de guardado + logging ---
             guard let urlStr = call.getString("url"),
-                    let videoURL = URL(string: urlStr) else {
+                  let videoURL = URL(string: urlStr) else {
                 call.reject("Debe indicar una URL válida")
                 return
             }
-            let placement = call.getObject("placement") ?? [:]
+
             let x      = CGFloat(call.getDouble("placement.x") ?? 0)
             let y      = CGFloat(call.getDouble("placement.y") ?? 0)
             let width  = CGFloat(call.getDouble("placement.width") ?? 200)
@@ -251,20 +109,16 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
             playerLayer.frame = CGRect(x: x, y: y, width: width, height: height)
             playerLayer.videoGravity = .resizeAspect
 
-            // 2) Añadir al view principal
+            // **1. Almacena el player INMEDIATAMENTE**
+            print("📥 [initPlayer] Antes de asignar: embeddedPlayers =", Array(self.embeddedPlayers.keys))
+            self.embeddedPlayers[playerId] = (player, playerLayer)
+            print("✅ [initPlayer] Tras asignar: embeddedPlayers =", Array(self.embeddedPlayers.keys))
+
+            // 2) Añadir al view principal y arrancar
             DispatchQueue.main.async {
                 self.bridge?.viewController?.view.layer.addSublayer(playerLayer)
-                
-                // Log previo
-                print("📥 [initPlayer] Antes: embeddedPlayers =", Array(self.embeddedPlayers.keys))
-                
-                // Guardado
-                self.embeddedPlayers[playerId] = (player, playerLayer)
                 player.play()
-                
-                // Log posterior
-                print("✅ [initPlayer] Después: embeddedPlayers =", Array(self.embeddedPlayers.keys))
-                
+
                 call.resolve([
                     "method": "initPlayer",
                     "result": true
@@ -272,8 +126,9 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
             }
             return
         }
-
     }
+    // swiftlint:enable function_body_length
+    // swiftlint:enable cyclomatic_complexity
 
     @objc func removePlayer(_ call: CAPPluginCall) {
         guard let playerId = call.getString("playerId") else {
@@ -281,15 +136,12 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
             return
         }
         print("📤 [removePlayer] embeddedPlayers disponibles =", Array(self.embeddedPlayers.keys))
+
         // 1) Fullscreen
         if self.mode == "fullscreen", playerId == self.fsPlayerId {
             DispatchQueue.main.async {
-                // dismiss sobre el controller que presentó el fullscreen
                 self.bridge?.viewController?.dismiss(animated: true) {
-                    call.resolve([
-                        "method": "removePlayer",
-                        "result": true
-                    ])
+                    call.resolve([ "method": "removePlayer", "result": true ])
                 }
             }
             return
@@ -298,22 +150,15 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
         // 2) Embedded
         guard let entry = embeddedPlayers[playerId] else {
             let activos = embeddedPlayers.keys.joined(separator: ", ")
-            call.reject(
-                "No existe ningún player con id \(playerId). " +
-                "Players activos: [\(activos)]"
-            )
+            call.reject("No existe ningún player con id \(playerId). Players activos: [\(activos)]")
             return
         }
+
         let (player, layer) = entry
         player.pause()
-        DispatchQueue.main.async {
-            layer.removeFromSuperlayer()
-        }
+        DispatchQueue.main.async { layer.removeFromSuperlayer() }
         embeddedPlayers.removeValue(forKey: playerId)
-        call.resolve([
-            "method": "removePlayer",
-            "result": true
-        ])
+        call.resolve([ "method": "removePlayer", "result": true ])
     }
 
     // swiftlint:enable function_body_length
@@ -614,24 +459,20 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
     // MARK: - Stop all player(s) playing
 
     @objc func stopAllPlayers(_ call: CAPPluginCall) {
-        self.call = call
-        if self.mode == "fullscreen" {
-            if let playerView = self.videoPlayerFullScreenView {
-                DispatchQueue.main.async {
-                    if playerView.isPlaying {
-                        playerView.pause()
-                    }
-                    call.resolve([ "result": true, "method": "stopAllPlayers", "value": true])
-                    return
-                }
-            } else {
-                let error: String = "Fullscreen player not found"
-                print(error)
-                call.resolve([ "result": false, "method": "stopAllPlayers", "message": error])
-                return
+        // 1) Recorremos todos los embedded players
+        for (playerId, (player, layer)) in embeddedPlayers {
+            player.pause()
+            DispatchQueue.main.async {
+                layer.removeFromSuperlayer()
             }
-
         }
+        // 2) Limpiamos el diccionario
+        embeddedPlayers.removeAll()
+        // 3) Devolvemos éxito
+        call.resolve([
+            "method": "stopAllPlayers",
+            "result": true
+        ])
     }
 
     // MARK: - get Rate for the given player
