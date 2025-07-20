@@ -1,0 +1,6 @@
+{
+  "appId": "com.jeep.plugin.capacitorvideoplayer.example",
+  "appName": "capacitor-video-player-example",
+  "webDir": "www",
+  "bundledWebRuntime": false
+}

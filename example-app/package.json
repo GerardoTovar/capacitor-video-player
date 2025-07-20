@@ -1,0 +1,25 @@
+{
+  "name": "capacitor-video-player-example",
+  "version": "7.0.0",
+  "description": "Example app to demo capacitor-video-player",
+  "main": "index.ts",
+  "keywords": [
+    "capacitor",
+    "mobile"
+  ],
+  "scripts": {
+    "start": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.0.0"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.0.0",
+    "capacitor-video-player": "file:../",
+    "vite": "^2.9.13"
+  },
+  "author": "",
+  "license": "ISC"
+}
