@@ -62,6 +62,4 @@ captures
 
 site
 
-# Android build artifacts
-android/build/
-android/.project
+android/build/outputs/logs

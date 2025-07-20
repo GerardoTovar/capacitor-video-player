@@ -19,6 +19,7 @@ import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.MediaStore;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.util.Log;
@@ -196,6 +197,10 @@ public class FullscreenExoPlayerFragment extends Fragment {
   private CastStateListener castStateListener = null;
   private Boolean playerReady = false;
 
+  // Thread safety and lifecycle management
+  private boolean isFragmentDestroyed = false;
+  private Handler mainHandler;
+
   /**
    * Create Fragment View
    * @param inflater
@@ -206,6 +211,11 @@ public class FullscreenExoPlayerFragment extends Fragment {
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
     context = container.getContext();
     packageManager = context.getPackageManager();
+    
+    // Initialize thread safety components
+    mainHandler = new Handler(Looper.getMainLooper());
+    isFragmentDestroyed = false;
+    
     view = inflater.inflate(R.layout.fragment_fs_exoplayer, container, false);
     constLayout = view.findViewById(R.id.fsExoPlayer);
     linearLayout = view.findViewById(R.id.linearLayout);
@@ -370,7 +380,7 @@ public class FullscreenExoPlayerFragment extends Fragment {
       };
 
     if (isTV) {
-      // Toast.makeText(context, "Device is a TV ", Toast.LENGTH_SHORT).show();
+      Toast.makeText(context, "Device is a TV ", Toast.LENGTH_SHORT).show();
     }
 
     if (!isInternal) {
@@ -408,12 +418,12 @@ public class FullscreenExoPlayerFragment extends Fragment {
                   @Override
                   public boolean onKey(View v, int keyCode, KeyEvent event) {
                     if (event.getAction() == KeyEvent.ACTION_UP) {
-                      long videoPosition = player.getCurrentPosition();
                       Log.v(TAG, "$$$$ onKey " + keyCode + " $$$$");
                       if (keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_HOME) {
                         Log.v(TAG, "$$$$ Going to backpress $$$$");
                         backPressed();
                       } else if (isTV) {
+                        long videoPosition = (player == null) ? 0 : player.getCurrentPosition();
                         switch (keyCode) {
                           case KeyEvent.KEYCODE_DPAD_RIGHT:
                             fastForward(videoPosition, 1);
@@ -524,6 +534,18 @@ public class FullscreenExoPlayerFragment extends Fragment {
   }
 
   /**
+   * Check if player operations are safe to perform
+   */
+  private boolean isPlayerOperationSafe() {
+    return !isFragmentDestroyed && 
+           player != null && 
+           getActivity() != null && 
+           !getActivity().isFinishing() && 
+           !getActivity().isDestroyed() &&
+           isAdded();
+  }
+
+  /**
    * Perform backPressed Action
    */
   private void backPressed() {
@@ -562,16 +584,15 @@ public class FullscreenExoPlayerFragment extends Fragment {
   }
 
   public void playerExit() {
-    Map<String, Object> info = new HashMap<String, Object>() {
+    if (player != null) {
+      Map<String, Object> info = new HashMap<String, Object>() {
       {
         put("dismiss", "1");
+        put("currentTime", getCurrentTime());
       }
     };
-    if (player != null) {
-      info.put("currentTime", getCurrentTime());
       player.seekTo(0);
       player.setVolume(curVolume);
-    }
     releasePlayer();
 /* 
     Activity mAct = getActivity();
@@ -585,6 +606,7 @@ public class FullscreenExoPlayerFragment extends Fragment {
       NotificationCenter.defaultCenter().postNotification("playerFullscreenDismiss", info);
     } catch (Exception e) {
       Log.e(TAG, "Error in posting notification");
+    }
     }
   }
 
@@ -676,9 +698,29 @@ public class FullscreenExoPlayerFragment extends Fragment {
    */
   @Override
   public void onDestroy() {
-    super.onDestroy();
-    if (chromecast) mRouter.removeCallback(mCallback);
+    isFragmentDestroyed = true;
+    
+    // Release player before calling super to ensure proper cleanup order
     releasePlayer();
+    
+    // Clean up handler
+    if (mainHandler != null) {
+        mainHandler.removeCallbacksAndMessages(null);
+        mainHandler = null;
+    }
+    
+    if (chromecast) mRouter.removeCallback(mCallback);
+    
+    super.onDestroy();
+  }
+
+  /**
+   * Perform onDetach Action
+   */
+  @Override
+  public void onDetach() {
+    isFragmentDestroyed = true;
+    super.onDetach();
   }
 
   /**
@@ -712,26 +754,73 @@ public class FullscreenExoPlayerFragment extends Fragment {
     }
   }
 
-  /**
-   * Release the player
-   */
   public void releasePlayer() {
+    if (isFragmentDestroyed) {
+        Log.w("VideoPlayer", "Fragment already destroyed, skipping player release");
+        return;
+    }
+    
     if (player != null) {
-      playWhenReady = player.getPlayWhenReady();
-      playbackPosition = player.getCurrentPosition();
-      currentWindow = player.getCurrentWindowIndex();
-      mediaSessionConnector.setPlayer(null);
-      mediaSession.setActive(false);
-      player.setRepeatMode(player.REPEAT_MODE_OFF);
-      player.removeListener(listener);
-      player.release();
-      player = null;
-      showSystemUI();
-      resetVariables();
-      if (chromecast) {
-        castPlayer.release();
-        castPlayer = null;
-      }
+        try {
+            // Ensure release called from main thread
+            // If current thread is main, release, if not post message to main
+            if (Looper.myLooper() == Looper.getMainLooper()) {
+                releasePlayerInternal();
+            } else if (mainHandler != null) {
+                mainHandler.post(() -> releasePlayerInternal());
+            } else {
+                Log.w("VideoPlayer", "Cannot release player from background thread without a handler. Player may not be released properly.");
+            }
+        } catch (Exception e) {
+            Log.e("VideoPlayer", "Error releasing player", e);
+            // Force cleanup
+            player = null;
+            if (castPlayer != null) {
+                castPlayer = null;
+            }
+        }
+    }
+  }
+
+  private void releasePlayerInternal() {
+    if (player != null && !isFragmentDestroyed) {
+        try {
+            playWhenReady = player.getPlayWhenReady();
+            playbackPosition = player.getCurrentPosition();
+            currentWindow = player.getCurrentWindowIndex();
+            
+            if (mediaSessionConnector != null) {
+                mediaSessionConnector.setPlayer(null);
+            }
+            
+            if (mediaSession != null) {
+                mediaSession.setActive(false);
+            }
+            
+            player.setRepeatMode(Player.REPEAT_MODE_OFF);
+            player.removeListener(listener);
+            player.stop(); // Add this line to properly stop the player
+            player.release();
+        } catch (Exception e) {
+            Log.e("VideoPlayer", "Error in releasePlayerInternal", e);
+        } finally {
+            player = null;
+        }
+        
+        showSystemUI();
+        resetVariables();
+    }
+    
+    // Move chromecast handling outside the player null check
+    // and add null check for castPlayer
+    if (chromecast && castPlayer != null) {
+        try {
+            castPlayer.release();
+        } catch (Exception e) {
+            Log.e("VideoPlayer", "Error releasing cast player", e);
+        } finally {
+            castPlayer = null;
+        }
     }
   }
 
@@ -1065,19 +1154,72 @@ public class FullscreenExoPlayerFragment extends Fragment {
    * Start the player
    */
   public void play() {
-    PlaybackParameters param = new PlaybackParameters(videoRate);
-    player.setPlaybackParameters(param);
+    if (isFragmentDestroyed || player == null) {
+        Log.w("VideoPlayer", "Cannot play - fragment destroyed or player null");
+        return;
+    }
+    
+    try {
+        // Ensure we're on the main thread
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            if (mainHandler != null) {
+                mainHandler.post(() -> playInternal());
+            }
+            return;
+        }
+        
+        playInternal();
+    } catch (Exception e) {
+        Log.e("VideoPlayer", "Error during play operation", e);
+    }
+  }
 
-        /* If the user start the cast before the player is ready and playing, then the video will start
-          in the device and chromecast at the same time. This is to avoid that behaviour.*/
-    if (!isCastSession) player.setPlayWhenReady(true);
+  private void playInternal() {
+    if (player != null && !isFragmentDestroyed) {
+        try {
+            PlaybackParameters param = new PlaybackParameters(videoRate);
+            player.setPlaybackParameters(param);
+
+            /* If the user start the cast before the player is ready and playing, then the video will start
+              in the device and chromecast at the same time. This is to avoid that behaviour.*/
+            if (!isCastSession) {
+                player.setPlayWhenReady(true);
+            }
+        } catch (Exception e) {
+            Log.e("VideoPlayer", "Error in playInternal", e);
+        }
+    }
   }
 
   /**
    * Pause the player
    */
   public void pause() {
-    if (player != null) player.setPlayWhenReady(false);
+    if (!isPlayerOperationSafe()) {
+        return;
+    }
+    
+    try {
+        if (Looper.myLooper() != Looper.getMainLooper()) {
+            if (mainHandler != null) {
+                mainHandler.post(() -> pauseInternal());
+            }
+            return;
+        }
+        pauseInternal();
+    } catch (Exception e) {
+        Log.e("VideoPlayer", "Error pausing player", e);
+    }
+  }
+
+  private void pauseInternal() {
+    if (player != null && !isFragmentDestroyed) {
+        try {
+            player.setPlayWhenReady(false);
+        } catch (Exception e) {
+            Log.e("VideoPlayer", "Error in pauseInternal", e);
+        }
+    }
   }
 
   /**
@@ -1093,6 +1235,9 @@ public class FullscreenExoPlayerFragment extends Fragment {
    * @return int in seconds
    */
   public int getCurrentTime() {
+    if (player == null) {
+      return 0;
+    }
     return player.getCurrentPosition() == UNKNOWN_TIME ? 0 : (int) (player.getCurrentPosition() / 1000);
   }
 
@@ -1101,14 +1246,23 @@ public class FullscreenExoPlayerFragment extends Fragment {
    * @param timeSecond int
    */
   public void setCurrentTime(int timeSecond) {
-    if (isInPictureInPictureMode) {
-      styledPlayerView.setUseController(false);
-      linearLayout.setVisibility(View.INVISIBLE);
+    if (!isPlayerOperationSafe()) {
+        Log.w("VideoPlayer", "Cannot set current time - player operation not safe");
+        return;
     }
-    long seekPosition = player.getCurrentPosition() == UNKNOWN_TIME
-      ? 0
-      : Math.min(Math.max(0, timeSecond * 1000), player.getDuration());
-    player.seekTo(seekPosition);
+    
+    try {
+        if (isInPictureInPictureMode) {
+            styledPlayerView.setUseController(false);
+            linearLayout.setVisibility(View.INVISIBLE);
+        }
+        long seekPosition = player.getCurrentPosition() == UNKNOWN_TIME
+            ? 0
+            : Math.min(Math.max(0, timeSecond * 1000), player.getDuration());
+        player.seekTo(seekPosition);
+    } catch (Exception e) {
+        Log.e("VideoPlayer", "Error setting current time", e);
+    }
   }
 
   /**

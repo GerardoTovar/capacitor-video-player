@@ -7,19 +7,19 @@ const CapacitorVideoPlayer = core.registerPlugin('CapacitorVideoPlayer', {
     web: () => Promise.resolve().then(function () { return web; }).then(m => new m.CapacitorVideoPlayerWeb()),
 });
 
-const possibleQueryParameterExtensions = [
-    'file',
-    'extension',
-    'filetype',
-    'type',
-    'ext',
-];
 const videoTypes = {
     mp4: 'video/mp4',
-    webm: 'video/mp4',
+    webm: 'video/webm',
     cmaf: 'video/mp4',
     cmfv: 'video/mp4',
     m3u8: 'application/x-mpegURL',
+    ogg: 'video/ogg',
+    ogv: 'video/ogg',
+    mov: 'video/quicktime',
+    avi: 'video/x-msvideo',
+    mkv: 'video/x-matroska',
+    flv: 'video/x-flv',
+    wmv: 'video/x-ms-wmv',
 };
 
 class VideoPlayer {
@@ -46,8 +46,8 @@ class VideoPlayer {
     }
     async initialize() {
         // get the video type
-        const urlVideoType = this._getVideoType();
-        if (urlVideoType) {
+        this._videoType = this._getVideoType();
+        if (this._videoType) {
             // style the container
             if (this._mode === 'fullscreen') {
                 this._container.style.position = 'absolute';
@@ -66,12 +66,8 @@ class VideoPlayer {
             this._container.style.justifyContent = 'center';
             this._container.style.backgroundColor = '#000000';
             this._container.style.zIndex = this._zIndex.toString();
-            const width = this._mode === 'fullscreen'
-                ? window.innerWidth /*this._container.offsetWidth*/
-                : this._width;
-            const height = this._mode === 'fullscreen'
-                ? window.innerHeight /*this._container.offsetHeight*/
-                : this._height;
+            const width = this._mode === 'fullscreen' ? window.innerWidth /*this._container.offsetWidth*/ : this._width;
+            const height = this._mode === 'fullscreen' ? window.innerHeight /*this._container.offsetHeight*/ : this._height;
             const xmlns = 'http://www.w3.org/2000/svg';
             const svg = document.createElementNS(xmlns, 'svg');
             svg.setAttributeNS(null, 'width', width.toString());
@@ -102,6 +98,7 @@ class VideoPlayer {
             }
         }
         else {
+            console.error('Url Error: type not supported');
             this._createEvent('Exit', this._playerId, 'Url Error: type not supported');
         }
         return;
@@ -216,7 +213,7 @@ class VideoPlayer {
         return;
     }
     async _setPlayer() {
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
             if (this.videoEl != null) {
                 if (Hls.isSupported() && this._videoType === 'application/x-mpegURL') {
                     const hls = new Hls();
@@ -236,11 +233,9 @@ class VideoPlayer {
                 else if (this._videoType === 'video/mp4') {
                     // CMAF (fMP4) && MP4
                     this.videoEl.src = this._url;
-                    if (this._url.substring(0, 5) != 'https' &&
-                        this._url.substring(0, 4) === 'http')
+                    if (this._url.substring(0, 5) != 'https' && this._url.substring(0, 4) === 'http')
                         this.videoEl.crossOrigin = 'anonymous';
-                    if (this._url.substring(0, 5) === 'https' ||
-                        this._url.substring(0, 4) === 'http')
+                    if (this._url.substring(0, 5) === 'https' || this._url.substring(0, 4) === 'http')
                         this.videoEl.muted = true;
                     resolve(true);
                 }
@@ -270,36 +265,27 @@ class VideoPlayer {
     _getVideoType() {
         const sUrl = this._url ? this._url : '';
         if (sUrl != null && sUrl.length > 0) {
-            Object.entries(videoTypes).forEach(([extension, mimeType]) => {
-                // we search for dot + extension (e.g. `.mp4`) for URLs that have the extension in the filename
-                // e.g. https://vimeo.com/?file=my-video.mp4
-                const hasDotExtension = sUrl.match(new RegExp(`.(${extension})`, 'i'));
-                if (hasDotExtension) {
-                    return (this._videoType = mimeType);
-                }
-                // we search for the extension (e.g. `m3u8`) for URLs that might have the extension as a query parameter
-                // e.g. https://youtube.com/?v=7894289374&type=m3u8
-                const hasExtensionInUrl = sUrl.match(new RegExp(`(${extension})`, 'i'));
-                if (hasExtensionInUrl) {
-                    return (this._videoType = mimeType);
-                }
-            });
-            // we check for not supported extensions for URLs that have the extension in the filename
-            // e.g. https://vimeo.com/?file=not-supported-extension-video.mkv
-            const hasNotSupportedDotExtension = sUrl.match(/\.(.*)/i);
-            if (hasNotSupportedDotExtension) {
-                return (this._videoType = null);
+            // we search for dot + extension (e.g. `.mp4`) for URLs that have the extension in the filename
+            // e.g. https://vimeo.com/?file=my-video.mp4
+            const dotExtensionRegex = new RegExp(`\\.(${Object.keys(videoTypes).join('|')})`, 'gi');
+            const dotExtensionMatch = dotExtensionRegex.exec(sUrl);
+            if (dotExtensionMatch) {
+                const ext = dotExtensionMatch[1];
+                return videoTypes[ext];
             }
-            // we check for not supported extensions for URLs that might have the extension as a query parameter
-            // e.g. https://youtube.com/?v=3982748927&filetype=mkv
-            const hasNotSupportedExtensionInUrl = sUrl.match(new RegExp(`(${possibleQueryParameterExtensions.join('|')})\=+(.*)&?(?=&|$))`, 'i'));
-            if (hasNotSupportedExtensionInUrl) {
-                return (this._videoType = null);
+            // we search for the extension (e.g. `m3u8`) for URLs that might have the extension as a query parameter
+            // e.g. https://youtube.com/?v=7894289374&type=m3u8
+            const queryParamRegex = new RegExp(`=(${Object.keys(videoTypes).join('|')})`, 'gi');
+            const queryParamMatch = queryParamRegex.exec(sUrl);
+            if (queryParamMatch) {
+                const ext = queryParamMatch[1];
+                return videoTypes[ext];
             }
             // No extension found, then we assume it's 'mp4' (Match case for '')
             return 'video/mp4';
         }
         // URL was not defined, we return null
+        console.error(`Failed to get video type`, sUrl);
         return null;
     }
     async _doHide(exitEl, duration) {
@@ -329,8 +315,7 @@ class VideoPlayer {
     _closeFullscreen() {
         const mydoc = document;
         const isInFullScreen = (mydoc.fullscreenElement && mydoc.fullscreenElement !== null) ||
-            (mydoc.webkitFullscreenElement &&
-                mydoc.webkitFullscreenElement !== null) ||
+            (mydoc.webkitFullscreenElement && mydoc.webkitFullscreenElement !== null) ||
             (mydoc.mozFullScreenElement && mydoc.mozFullScreenElement !== null) ||
             (mydoc.msFullscreenElement && mydoc.msFullscreenElement !== null);
         if (isInFullScreen) {
@@ -415,9 +400,7 @@ class CapacitorVideoPlayerWeb extends core.WebPlugin {
                 const loopRet = options.loopOnEnd;
                 loopOnEnd = loopRet != null ? loopRet : false;
             }
-            const componentTag = options.componentTag
-                ? options.componentTag
-                : '';
+            const componentTag = options.componentTag ? options.componentTag : '';
             if (componentTag == null || componentTag.length === 0) {
                 return Promise.resolve({
                     result: false,
@@ -787,8 +770,7 @@ class CapacitorVideoPlayerWeb extends core.WebPlugin {
         let seekTime = options.seektime ? options.seektime : 0;
         if (this._players[playerId]) {
             const duration = this._players[playerId].videoEl.duration;
-            seekTime =
-                seekTime <= duration && seekTime >= 0 ? seekTime : duration / 2;
+            seekTime = seekTime <= duration && seekTime >= 0 ? seekTime : duration / 2;
             this._players[playerId].videoEl.currentTime = seekTime;
             return Promise.resolve({
                 method: 'setCurrentTime',
@@ -908,15 +890,10 @@ class CapacitorVideoPlayerWeb extends core.WebPlugin {
         return playerSize;
     }
     async _initializeVideoPlayer(url, playerId, mode, rate, exitOnEnd, loopOnEnd, componentTag, playerSize) {
-        const videoURL = url
-            ? url.indexOf('%2F') == -1
-                ? encodeURI(url)
-                : url
-            : null;
+        const videoURL = url ? (url.indexOf('%2F') == -1 ? encodeURI(url) : url) : null;
         if (videoURL === null)
             return Promise.resolve(false);
-        this.videoContainer =
-            await this._getContainerElement(playerId, componentTag);
+        this.videoContainer = await this._getContainerElement(playerId, componentTag);
         if (this.videoContainer === null)
             return Promise.resolve({
                 method: 'initPlayer',

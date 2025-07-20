@@ -17,10 +17,7 @@ export interface IPlayerSize {
   width: number;
 }
 
-export class CapacitorVideoPlayerWeb
-  extends WebPlugin
-  implements CapacitorVideoPlayerPlugin
-{
+export class CapacitorVideoPlayerWeb extends WebPlugin implements CapacitorVideoPlayerPlugin {
   private _players: any = [];
   private videoContainer!: HTMLDivElement | null;
   private mode!: string;
@@ -39,9 +36,7 @@ export class CapacitorVideoPlayerWeb
    *
    * @param options
    */
-  async initPlayer(
-    options: capVideoPlayerOptions,
-  ): Promise<capVideoPlayerResult> {
+  async initPlayer(options: capVideoPlayerOptions): Promise<capVideoPlayerResult> {
     if (options == null) {
       return Promise.resolve({
         result: false,
@@ -93,9 +88,7 @@ export class CapacitorVideoPlayerWeb
         const loopRet = options.loopOnEnd;
         loopOnEnd = loopRet != null ? loopRet : false;
       }
-      const componentTag: string = options.componentTag
-        ? options.componentTag
-        : '';
+      const componentTag: string = options.componentTag ? options.componentTag : '';
       if (componentTag == null || componentTag.length === 0) {
         return Promise.resolve({
           result: false,
@@ -131,9 +124,7 @@ export class CapacitorVideoPlayerWeb
    *
    * @param options
    */
-  async isPlaying(
-    options: capVideoPlayerIdOptions,
-  ): Promise<capVideoPlayerResult> {
+  async isPlaying(options: capVideoPlayerIdOptions): Promise<capVideoPlayerResult> {
     if (options == null) {
       return Promise.resolve({
         result: false,
@@ -207,8 +198,7 @@ export class CapacitorVideoPlayerWeb
       playerId = 'fullscreen';
     }
     if (this._players[playerId]) {
-      if (this._players[playerId].isPlaying)
-        await this._players[playerId].videoEl.pause();
+      if (this._players[playerId].isPlaying) await this._players[playerId].videoEl.pause();
       return Promise.resolve({ method: 'pause', result: true, value: true });
     } else {
       return Promise.resolve({
@@ -223,9 +213,7 @@ export class CapacitorVideoPlayerWeb
    *
    * @param options
    */
-  async getDuration(
-    options: capVideoPlayerIdOptions,
-  ): Promise<capVideoPlayerResult> {
+  async getDuration(options: capVideoPlayerIdOptions): Promise<capVideoPlayerResult> {
     if (options == null) {
       return Promise.resolve({
         result: false,
@@ -270,8 +258,7 @@ export class CapacitorVideoPlayerWeb
       playerId = 'fullscreen';
     }
     const rateList: number[] = [0.25, 0.5, 0.75, 1.0, 2.0, 4.0];
-    const rate: number =
-      options.rate && rateList.includes(options.rate) ? options.rate : 1.0;
+    const rate: number = options.rate && rateList.includes(options.rate) ? options.rate : 1.0;
     if (this._players[playerId]) {
       this._players[playerId].videoEl.playbackRate = rate;
       return Promise.resolve({
@@ -292,9 +279,7 @@ export class CapacitorVideoPlayerWeb
    *
    * @param options
    */
-  async getRate(
-    options: capVideoPlayerIdOptions,
-  ): Promise<capVideoPlayerResult> {
+  async getRate(options: capVideoPlayerIdOptions): Promise<capVideoPlayerResult> {
     if (options == null) {
       return Promise.resolve({
         result: false,
@@ -327,9 +312,7 @@ export class CapacitorVideoPlayerWeb
    *
    * @param options
    */
-  async setVolume(
-    options: capVideoVolumeOptions,
-  ): Promise<capVideoPlayerResult> {
+  async setVolume(options: capVideoVolumeOptions): Promise<capVideoPlayerResult> {
     if (options == null) {
       return Promise.resolve({
         result: false,
@@ -362,9 +345,7 @@ export class CapacitorVideoPlayerWeb
    *
    * @param options
    */
-  async getVolume(
-    options: capVideoPlayerIdOptions,
-  ): Promise<capVideoPlayerResult> {
+  async getVolume(options: capVideoPlayerIdOptions): Promise<capVideoPlayerResult> {
     if (options == null) {
       return Promise.resolve({
         result: false,
@@ -429,9 +410,7 @@ export class CapacitorVideoPlayerWeb
    *
    * @param options
    */
-  async getMuted(
-    options: capVideoPlayerIdOptions,
-  ): Promise<capVideoPlayerResult> {
+  async getMuted(options: capVideoPlayerIdOptions): Promise<capVideoPlayerResult> {
     if (options == null) {
       return Promise.resolve({
         result: false,
@@ -463,9 +442,7 @@ export class CapacitorVideoPlayerWeb
    *
    * @param options
    */
-  async setCurrentTime(
-    options: capVideoTimeOptions,
-  ): Promise<capVideoPlayerResult> {
+  async setCurrentTime(options: capVideoTimeOptions): Promise<capVideoPlayerResult> {
     if (options == null) {
       return Promise.resolve({
         result: false,
@@ -480,8 +457,7 @@ export class CapacitorVideoPlayerWeb
     let seekTime: number = options.seektime ? options.seektime : 0;
     if (this._players[playerId]) {
       const duration: number = this._players[playerId].videoEl.duration;
-      seekTime =
-        seekTime <= duration && seekTime >= 0 ? seekTime : duration / 2;
+      seekTime = seekTime <= duration && seekTime >= 0 ? seekTime : duration / 2;
       this._players[playerId].videoEl.currentTime = seekTime;
       return Promise.resolve({
         method: 'setCurrentTime',
@@ -501,9 +477,7 @@ export class CapacitorVideoPlayerWeb
    *
    * @param options
    */
-  async getCurrentTime(
-    options: capVideoPlayerIdOptions,
-  ): Promise<capVideoPlayerResult> {
+  async getCurrentTime(options: capVideoPlayerIdOptions): Promise<capVideoPlayerResult> {
     if (options == null) {
       return Promise.resolve({
         result: false,
@@ -609,14 +583,9 @@ export class CapacitorVideoPlayerWeb
     componentTag: string,
     playerSize: IPlayerSize,
   ): Promise<any> {
-    const videoURL: string = url
-      ? url.indexOf('%2F') == -1
-        ? encodeURI(url)
-        : url
-      : (null as any);
+    const videoURL: string = url ? (url.indexOf('%2F') == -1 ? encodeURI(url) : url) : (null as any);
     if (videoURL === null) return Promise.resolve(false);
-    this.videoContainer =
-      await this._getContainerElement(playerId, componentTag);
+    this.videoContainer = await this._getContainerElement(playerId, componentTag);
     if (this.videoContainer === null)
       return Promise.resolve({
         method: 'initPlayer',
@@ -665,16 +634,11 @@ export class CapacitorVideoPlayerWeb
     }
     return Promise.resolve({ method: 'initPlayer', result: true, value: true });
   }
-  private async _getContainerElement(
-    playerId: string,
-    componentTag: string,
-  ): Promise<HTMLDivElement | null> {
+  private async _getContainerElement(playerId: string, componentTag: string): Promise<HTMLDivElement | null> {
     const videoContainer: HTMLDivElement = document.createElement('div');
     videoContainer.id = `vc_${playerId}`;
     if (componentTag != null && componentTag.length > 0) {
-      const cmpTagEl: HTMLElement | null = document.querySelector(
-        `${componentTag}`,
-      );
+      const cmpTagEl: HTMLElement | null = document.querySelector(`${componentTag}`);
       if (cmpTagEl === null) return Promise.resolve(null);
       let container: HTMLDivElement | null = null;
       const shadowRoot = cmpTagEl.shadowRoot ? cmpTagEl.shadowRoot : null;
@@ -715,38 +679,78 @@ export class CapacitorVideoPlayerWeb
   }
 
   private addListeners() {
-    document.addEventListener('videoPlayerPlay', (ev: any) => {
-      this.handlePlayerPlay(ev.detail);
-    },false);
-    document.addEventListener('videoPlayerPause', (ev: any) => {
-      this.handlePlayerPause(ev.detail);
-    },false);
-    document.addEventListener('videoPlayerEnded', (ev: any) => {
-      this.handlePlayerEnded(ev.detail);
-    },false);
-    document.addEventListener('videoPlayerReady', (ev: any) => {
-      this.handlePlayerReady(ev.detail);
-    },false);
-    document.addEventListener('videoPlayerExit', () => {
-      this.handlePlayerExit();
-    },false);
+    document.addEventListener(
+      'videoPlayerPlay',
+      (ev: any) => {
+        this.handlePlayerPlay(ev.detail);
+      },
+      false,
+    );
+    document.addEventListener(
+      'videoPlayerPause',
+      (ev: any) => {
+        this.handlePlayerPause(ev.detail);
+      },
+      false,
+    );
+    document.addEventListener(
+      'videoPlayerEnded',
+      (ev: any) => {
+        this.handlePlayerEnded(ev.detail);
+      },
+      false,
+    );
+    document.addEventListener(
+      'videoPlayerReady',
+      (ev: any) => {
+        this.handlePlayerReady(ev.detail);
+      },
+      false,
+    );
+    document.addEventListener(
+      'videoPlayerExit',
+      () => {
+        this.handlePlayerExit();
+      },
+      false,
+    );
   }
 
   private removeListeners() {
-    document.removeEventListener('videoPlayerPlay', (ev: any) => {
-      this.handlePlayerPlay(ev.detail);
-    },false);
-    document.removeEventListener('videoPlayerPause', (ev: any) => {
-      this.handlePlayerPause(ev.detail);
-    },false);
-    document.removeEventListener('videoPlayerEnded', (ev: any) => {
-      this.handlePlayerEnded(ev.detail);
-    },false);
-    document.removeEventListener('videoPlayerReady', (ev: any) => {
-      this.handlePlayerReady(ev.detail);
-    },false);
-    document.removeEventListener('videoPlayerExit', () => {
-      this.handlePlayerExit();
-    },false);
+    document.removeEventListener(
+      'videoPlayerPlay',
+      (ev: any) => {
+        this.handlePlayerPlay(ev.detail);
+      },
+      false,
+    );
+    document.removeEventListener(
+      'videoPlayerPause',
+      (ev: any) => {
+        this.handlePlayerPause(ev.detail);
+      },
+      false,
+    );
+    document.removeEventListener(
+      'videoPlayerEnded',
+      (ev: any) => {
+        this.handlePlayerEnded(ev.detail);
+      },
+      false,
+    );
+    document.removeEventListener(
+      'videoPlayerReady',
+      (ev: any) => {
+        this.handlePlayerReady(ev.detail);
+      },
+      false,
+    );
+    document.removeEventListener(
+      'videoPlayerExit',
+      () => {
+        this.handlePlayerExit();
+      },
+      false,
+    );
   }
 }

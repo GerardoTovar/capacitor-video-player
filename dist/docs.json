@@ -318,6 +318,65 @@
           "capVideoPlayerResult"
         ],
         "slug": "exitplayer"
+      },
+      {
+        "name": "addListener",
+        "signature": "(event: VideoEventName, callback: (e: capVideoListener) => void) => Promise<PluginListenerHandle>",
+        "parameters": [
+          {
+            "name": "event",
+            "docs": "",
+            "type": "VideoEventName"
+          },
+          {
+            "name": "callback",
+            "docs": "",
+            "type": "(e: capVideoListener) => void"
+          }
+        ],
+        "returns": "Promise<PluginListenerHandle>",
+        "tags": [],
+        "docs": "Register event listener",
+        "complexTypes": [
+          "PluginListenerHandle",
+          "VideoEventName",
+          "capVideoListener"
+        ],
+        "slug": "addlistenervideoeventname-"
+      },
+      {
+        "name": "addListener",
+        "signature": "(event: 'jeepCapVideoPlayerExit', callback: (e: capVideoListenerExit) => void) => Promise<PluginListenerHandle>",
+        "parameters": [
+          {
+            "name": "event",
+            "docs": "",
+            "type": "'jeepCapVideoPlayerExit'"
+          },
+          {
+            "name": "callback",
+            "docs": "",
+            "type": "(e: capVideoListenerExit) => void"
+          }
+        ],
+        "returns": "Promise<PluginListenerHandle>",
+        "tags": [],
+        "docs": "Register event listener",
+        "complexTypes": [
+          "PluginListenerHandle",
+          "capVideoListenerExit"
+        ],
+        "slug": "addlistenerjeepcapvideoplayerexit-"
+      },
+      {
+        "name": "removeAllListeners",
+        "signature": "() => Promise<void>",
+        "parameters": [],
+        "returns": "Promise<void>",
+        "tags": [],
+        "docs": "",
+        "complexTypes": [],
+        "slug": "removealllisteners"
       }
     ],
     "properties": []
@@ -678,9 +737,95 @@
           "type": "number | undefined"
         }
       ]
+    },
+    {
+      "name": "PluginListenerHandle",
+      "slug": "pluginlistenerhandle",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "remove",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "() => Promise<void>"
+        }
+      ]
+    },
+    {
+      "name": "capVideoListener",
+      "slug": "capvideolistener",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "fromPlayerId",
+          "tags": [],
+          "docs": "Id of DIV Element parent of the player",
+          "complexTypes": [],
+          "type": "string | undefined"
+        },
+        {
+          "name": "currentTime",
+          "tags": [],
+          "docs": "Video current time when listener trigerred",
+          "complexTypes": [],
+          "type": "number | undefined"
+        }
+      ]
+    },
+    {
+      "name": "capVideoListenerExit",
+      "slug": "capvideolistenerexit",
+      "docs": "",
+      "tags": [],
+      "methods": [],
+      "properties": [
+        {
+          "name": "dismiss",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "boolean | undefined"
+        },
+        {
+          "name": "currentTime",
+          "tags": [],
+          "docs": "",
+          "complexTypes": [],
+          "type": "number"
+        }
+      ]
     }
   ],
   "enums": [],
-  "typeAliases": [],
+  "typeAliases": [
+    {
+      "name": "VideoEventName",
+      "slug": "videoeventname",
+      "docs": "",
+      "types": [
+        {
+          "text": "'jeepCapVideoPlayerReady'",
+          "complexTypes": []
+        },
+        {
+          "text": "'jeepCapVideoPlayerPlay'",
+          "complexTypes": []
+        },
+        {
+          "text": "'jeepCapVideoPlayerPause'",
+          "complexTypes": []
+        },
+        {
+          "text": "'jeepCapVideoPlayerEnded'",
+          "complexTypes": []
+        }
+      ]
+    }
+  ],
   "pluginConfigs": []
 }

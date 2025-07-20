@@ -1,7 +1,7 @@
 import Hls from 'hls.js';
 
-import type { videoMimeType } from './video-types';
-import { videoTypes, possibleQueryParameterExtensions } from './video-types';
+import type { videoExtension, videoMimeType } from './video-types';
+import { videoTypes } from './video-types';
 
 export class VideoPlayer {
   public videoEl: HTMLVideoElement | undefined;
@@ -52,8 +52,8 @@ export class VideoPlayer {
 
   public async initialize(): Promise<void> {
     // get the video type
-    const urlVideoType: videoMimeType | null = this._getVideoType();
-    if (urlVideoType) {
+    this._videoType = this._getVideoType();
+    if (this._videoType) {
       // style the container
       if (this._mode === 'fullscreen') {
         this._container.style.position = 'absolute';
@@ -73,13 +73,9 @@ export class VideoPlayer {
       this._container.style.backgroundColor = '#000000';
       this._container.style.zIndex = this._zIndex.toString();
       const width: number =
-        this._mode === 'fullscreen'
-          ? window.innerWidth /*this._container.offsetWidth*/
-          : this._width;
+        this._mode === 'fullscreen' ? window.innerWidth /*this._container.offsetWidth*/ : this._width;
       const height: number =
-        this._mode === 'fullscreen'
-          ? window.innerHeight /*this._container.offsetHeight*/
-          : this._height;
+        this._mode === 'fullscreen' ? window.innerHeight /*this._container.offsetHeight*/ : this._height;
       const xmlns = 'http://www.w3.org/2000/svg';
 
       const svg = document.createElementNS(xmlns, 'svg');
@@ -108,26 +104,16 @@ export class VideoPlayer {
       /*   Create Video Element */
       const isCreated = await this.createVideoElement(width, heightVideo);
       if (!isCreated) {
-        this._createEvent(
-          'Exit',
-          this._playerId,
-          'Video Error: failed to create the Video Element',
-        );
+        this._createEvent('Exit', this._playerId, 'Video Error: failed to create the Video Element');
       }
     } else {
-      this._createEvent(
-        'Exit',
-        this._playerId,
-        'Url Error: type not supported',
-      );
+      console.error('Url Error: type not supported');
+      this._createEvent('Exit', this._playerId, 'Url Error: type not supported');
     }
     return;
   }
 
-  private async createVideoElement(
-    width: number,
-    height: number,
-  ): Promise<boolean> {
+  private async createVideoElement(width: number, height: number): Promise<boolean> {
     this.videoEl = document.createElement('video');
     this.videoEl.controls = true;
     this.videoEl.style.zIndex = (this._zIndex + 3).toString();
@@ -237,7 +223,7 @@ export class VideoPlayer {
   }
 
   private async _setPlayer(): Promise<boolean> {
-    return new Promise(resolve => {
+    return new Promise((resolve) => {
       if (this.videoEl != null) {
         if (Hls.isSupported() && this._videoType === 'application/x-mpegURL') {
           const hls = new Hls();
@@ -255,16 +241,9 @@ export class VideoPlayer {
         } else if (this._videoType === 'video/mp4') {
           // CMAF (fMP4) && MP4
           this.videoEl.src = this._url;
-          if (
-            this._url.substring(0, 5) != 'https' &&
-            this._url.substring(0, 4) === 'http'
-          )
+          if (this._url.substring(0, 5) != 'https' && this._url.substring(0, 4) === 'http')
             this.videoEl.crossOrigin = 'anonymous';
-          if (
-            this._url.substring(0, 5) === 'https' ||
-            this._url.substring(0, 4) === 'http'
-          )
-            this.videoEl.muted = true;
+          if (this._url.substring(0, 5) === 'https' || this._url.substring(0, 4) === 'http') this.videoEl.muted = true;
           resolve(true);
         } else {
           // Not Supported
@@ -291,42 +270,31 @@ export class VideoPlayer {
 
   private _getVideoType(): videoMimeType | null {
     const sUrl: string = this._url ? this._url : '';
+
     if (sUrl != null && sUrl.length > 0) {
-      Object.entries(videoTypes).forEach(([extension, mimeType]) => {
-        // we search for dot + extension (e.g. `.mp4`) for URLs that have the extension in the filename
-        // e.g. https://vimeo.com/?file=my-video.mp4
-        const hasDotExtension = sUrl.match(new RegExp(`.(${extension})`, 'i'));
-        if (hasDotExtension) {
-          return (this._videoType = mimeType);
-        }
-        // we search for the extension (e.g. `m3u8`) for URLs that might have the extension as a query parameter
-        // e.g. https://youtube.com/?v=7894289374&type=m3u8
-        const hasExtensionInUrl = sUrl.match(new RegExp(`(${extension})`, 'i'));
-        if (hasExtensionInUrl) {
-          return (this._videoType = mimeType);
-        }
-      });
-      // we check for not supported extensions for URLs that have the extension in the filename
-      // e.g. https://vimeo.com/?file=not-supported-extension-video.mkv
-      const hasNotSupportedDotExtension = sUrl.match(/\.(.*)/i);
-      if (hasNotSupportedDotExtension) {
-        return (this._videoType = null);
+      // we search for dot + extension (e.g. `.mp4`) for URLs that have the extension in the filename
+      // e.g. https://vimeo.com/?file=my-video.mp4
+      const dotExtensionRegex = new RegExp(`\\.(${Object.keys(videoTypes).join('|')})`, 'gi');
+      const dotExtensionMatch = dotExtensionRegex.exec(sUrl);
+      if (dotExtensionMatch) {
+        const ext = dotExtensionMatch[1] as videoExtension;
+        return videoTypes[ext];
       }
-      // we check for not supported extensions for URLs that might have the extension as a query parameter
-      // e.g. https://youtube.com/?v=3982748927&filetype=mkv
-      const hasNotSupportedExtensionInUrl = sUrl.match(
-        new RegExp(
-          `(${possibleQueryParameterExtensions.join('|')})\=+(.*)&?(?=&|$))`,
-          'i',
-        ),
-      );
-      if (hasNotSupportedExtensionInUrl) {
-        return (this._videoType = null);
+
+      // we search for the extension (e.g. `m3u8`) for URLs that might have the extension as a query parameter
+      // e.g. https://youtube.com/?v=7894289374&type=m3u8
+      const queryParamRegex = new RegExp(`=(${Object.keys(videoTypes).join('|')})`, 'gi');
+      const queryParamMatch = queryParamRegex.exec(sUrl);
+      if (queryParamMatch) {
+        const ext = queryParamMatch[1] as videoExtension;
+        return videoTypes[ext];
       }
+
       // No extension found, then we assume it's 'mp4' (Match case for '')
       return 'video/mp4';
     }
     // URL was not defined, we return null
+    console.error(`Failed to get video type`, sUrl);
     return null;
   }
 
@@ -357,8 +325,7 @@ export class VideoPlayer {
     const mydoc: any = document;
     const isInFullScreen: boolean =
       (mydoc.fullscreenElement && mydoc.fullscreenElement !== null) ||
-      (mydoc.webkitFullscreenElement &&
-        mydoc.webkitFullscreenElement !== null) ||
+      (mydoc.webkitFullscreenElement && mydoc.webkitFullscreenElement !== null) ||
       (mydoc.mozFullScreenElement && mydoc.mozFullScreenElement !== null) ||
       (mydoc.msFullscreenElement && mydoc.msFullscreenElement !== null);
     if (isInFullScreen) {

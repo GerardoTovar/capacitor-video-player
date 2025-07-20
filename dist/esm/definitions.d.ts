@@ -1,3 +1,4 @@
+import { PluginListenerHandle } from '@capacitor/core';
 export interface CapacitorVideoPlayerPlugin {
     /**
      * Echo
@@ -89,6 +90,15 @@ export interface CapacitorVideoPlayerPlugin {
      *
      */
     exitPlayer(): Promise<capVideoPlayerResult>;
+    /**
+     * Register event listener
+     */
+    addListener(event: VideoEventName, callback: (e: capVideoListener) => void): Promise<PluginListenerHandle>;
+    /**
+     * Register event listener
+     */
+    addListener(event: 'jeepCapVideoPlayerExit', callback: (e: capVideoListenerExit) => void): Promise<PluginListenerHandle>;
+    removeAllListeners(): Promise<void>;
 }
 export interface capEchoOptions {
     /**
@@ -257,11 +267,15 @@ export interface capVideoListener {
     /**
      * Id of DIV Element parent of the player
      */
-    playerId?: string;
+    fromPlayerId?: string;
     /**
      * Video current time when listener trigerred
      */
     currentTime?: number;
+}
+export interface capVideoListenerExit {
+    dismiss?: boolean;
+    currentTime: number;
 }
 export interface capExitListener {
     /**
@@ -305,3 +319,4 @@ export interface SubTitleOptions {
      */
     fontSize?: number;
 }
+export type VideoEventName = 'jeepCapVideoPlayerReady' | 'jeepCapVideoPlayerPlay' | 'jeepCapVideoPlayerPause' | 'jeepCapVideoPlayerEnded';

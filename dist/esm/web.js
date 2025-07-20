@@ -65,9 +65,7 @@ export class CapacitorVideoPlayerWeb extends WebPlugin {
                 const loopRet = options.loopOnEnd;
                 loopOnEnd = loopRet != null ? loopRet : false;
             }
-            const componentTag = options.componentTag
-                ? options.componentTag
-                : '';
+            const componentTag = options.componentTag ? options.componentTag : '';
             if (componentTag == null || componentTag.length === 0) {
                 return Promise.resolve({
                     result: false,
@@ -437,8 +435,7 @@ export class CapacitorVideoPlayerWeb extends WebPlugin {
         let seekTime = options.seektime ? options.seektime : 0;
         if (this._players[playerId]) {
             const duration = this._players[playerId].videoEl.duration;
-            seekTime =
-                seekTime <= duration && seekTime >= 0 ? seekTime : duration / 2;
+            seekTime = seekTime <= duration && seekTime >= 0 ? seekTime : duration / 2;
             this._players[playerId].videoEl.currentTime = seekTime;
             return Promise.resolve({
                 method: 'setCurrentTime',
@@ -558,15 +555,10 @@ export class CapacitorVideoPlayerWeb extends WebPlugin {
         return playerSize;
     }
     async _initializeVideoPlayer(url, playerId, mode, rate, exitOnEnd, loopOnEnd, componentTag, playerSize) {
-        const videoURL = url
-            ? url.indexOf('%2F') == -1
-                ? encodeURI(url)
-                : url
-            : null;
+        const videoURL = url ? (url.indexOf('%2F') == -1 ? encodeURI(url) : url) : null;
         if (videoURL === null)
             return Promise.resolve(false);
-        this.videoContainer =
-            await this._getContainerElement(playerId, componentTag);
+        this.videoContainer = await this._getContainerElement(playerId, componentTag);
         if (this.videoContainer === null)
             return Promise.resolve({
                 method: 'initPlayer',
