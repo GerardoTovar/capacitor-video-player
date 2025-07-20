@@ -268,13 +268,15 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
 
     @objc func removePlayer(_ call: CAPPluginCall) {
         guard let playerId = call.getString("playerId") else {
-            call.reject("Debe indicar playerId"); return
+            call.reject("Debe indicar playerId")
+            return
         }
-        // --- Nuevo: si estamos en fullscreen, despedimos el controlador ---
+
+        // 1) Fullscreen
         if self.mode == "fullscreen", playerId == self.fsPlayerId {
             DispatchQueue.main.async {
-                // videoPlayerFullScreenView es tu AVPlayerViewController personalizado
-                self.videoPlayerFullScreenView?.dismiss(animated: true) {
+                // dismiss sobre el controller que presentó el fullscreen
+                self.bridge?.viewController?.dismiss(animated: true) {
                     call.resolve([
                         "method": "removePlayer",
                         "result": true
@@ -283,14 +285,22 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
             }
             return
         }
+
+        // 2) Embedded
         guard let entry = embeddedPlayers[playerId] else {
-            call.reject("No existe ningún player con id \(playerId)"); return
+            call.reject("No existe ningún player con id \(playerId)")
+            return
         }
         let (player, layer) = entry
         player.pause()
-        DispatchQueue.main.async { layer.removeFromSuperlayer() }
+        DispatchQueue.main.async {
+            layer.removeFromSuperlayer()
+        }
         embeddedPlayers.removeValue(forKey: playerId)
-        call.resolve(["method": "removePlayer", "result": true])
+        call.resolve([
+            "method": "removePlayer",
+            "result": true
+        ])
     }
 
     // swiftlint:enable function_body_length
