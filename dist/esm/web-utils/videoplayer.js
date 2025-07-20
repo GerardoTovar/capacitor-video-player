@@ -84,6 +84,11 @@ export class VideoPlayer {
     async createVideoElement(width, height) {
         this.videoEl = document.createElement('video');
         this.videoEl.controls = true;
+        // Permite inline en iOS
+        this.videoEl.playsInline = true;
+        // Para compatibilidad Safari antigua / WebKit
+        this.videoEl.setAttribute('webkit-playsinline', 'true');
+        this.videoEl.setAttribute('playsinline', 'true');
         this.videoEl.style.zIndex = (this._zIndex + 3).toString();
         this.videoEl.style.width = `${width.toString()}px`;
         this.videoEl.style.height = `${height.toString()}px`;
