@@ -288,7 +288,11 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
 
         // 2) Embedded
         guard let entry = embeddedPlayers[playerId] else {
-            call.reject("No existe ningún player con id \(playerId)")
+            let activos = embeddedPlayers.keys.joined(separator: ", ")
+            call.reject(
+                "No existe ningún player con id \(playerId). " +
+                "Players activos: [\(activos)]"
+            )
             return
         }
         let (player, layer) = entry
