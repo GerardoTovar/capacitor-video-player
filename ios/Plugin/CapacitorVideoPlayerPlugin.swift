@@ -63,6 +63,7 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
     // swiftlint:disable function_body_length
     // swiftlint:disable cyclomatic_complexity
     @objc func initPlayer(_ call: CAPPluginCall) {
+        print("🔥 [initPlayer] 🔥 — llamada recibida desde JS con options:", call.options)
         self.call = call
 
         guard let mode = call.options["mode"] as? String else {
@@ -131,6 +132,7 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
     // swiftlint:enable cyclomatic_complexity
 
     @objc func removePlayer(_ call: CAPPluginCall) {
+        print("🔥 [removePlayer] 🔥 — llamada recibida desde JS con playerId:", call.getString("playerId") ?? "nil")
         guard let playerId = call.getString("playerId") else {
             call.reject("Debe indicar playerId")
             return
