@@ -11,6 +11,7 @@ import UIKit
 // swiftlint:disable file_length
 // swiftlint:disable type_body_length
 public class CapacitorVideoPlayerPlugin: CAPPlugin {
+    var isPIPModeAvailable: Bool = false
     var embeddedPlayers: [String: (AVPlayer, AVPlayerLayer)] = [:]
     public var call: CAPPluginCall?
     public var videoPlayer: AVPlayerViewController?
@@ -228,6 +229,7 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
                     title: title,
                     smallTitle: smallTitle,
                     artwork: artwork)
+                return
 
             }
         } else if mode == "embedded" {
