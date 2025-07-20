@@ -266,38 +266,18 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
     }
 
     @objc func removePlayer(_ call: CAPPluginCall) {
-        // 2) ¿Es un embedded?
-        if let (player, layer) = embeddedPlayers[playerId] {
-            // Detén y quita la capa
-            player.pause()
-            DispatchQueue.main.async {
-                layer.removeFromSuperlayer()
-            }
-            embeddedPlayers.removeValue(forKey: playerId)
-            call.resolve([
-                "method": "removePlayer",
-                "playerId": playerId,
-                "result": true
-            ])
-            return
+        guard let playerId = call.getString("playerId") else {
+            call.reject("Debe indicar playerId"); return
         }
-        // 3) ¿O es el fullscreen?
-        if playerId == fsPlayerId, let full = videoPlayerFullScreenView {
-            DispatchQueue.main.async {
-                full.dismiss(animated: true) {
-                    call.resolve([
-                        "method": "removePlayer",
-                        "playerId": playerId,
-                        "result": true
-                    ])
-                }
-            }
-            return
+        guard let entry = embeddedPlayers[playerId] else {
+            call.reject("No existe ningún player con id \(playerId)"); return
         }
-        // 4) Ni embedded ni fullscreen
-        call.reject("removePlayer: no player found for id \(playerId)")
+        let (player, layer) = entry
+        player.pause()
+        DispatchQueue.main.async { layer.removeFromSuperlayer() }
+        embeddedPlayers.removeValue(forKey: playerId)
+        call.resolve(["method": "removePlayer", "result": true])
     }
-
 
     // swiftlint:enable function_body_length
     // swiftlint:enable cyclomatic_complexity
