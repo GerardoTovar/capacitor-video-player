@@ -265,7 +265,7 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
 
     }
 
-    @ @objc func removePlayer(_ call: CAPPluginCall) {
+    @objc func removePlayer(_ call: CAPPluginCall) {
         // 2) ¿Es un embedded?
         if let (player, layer) = embeddedPlayers[playerId] {
             // Detén y quita la capa
