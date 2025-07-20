@@ -120,6 +120,22 @@ export class CapacitorVideoPlayerWeb extends WebPlugin implements CapacitorVideo
     }
   }
   /**
+   * Limpia un player embedded en web (o hace el “stub” si no aplica).
+   */
+  async removePlayer(options: capVideoPlayerIdOptions): Promise<capVideoPlayerResult> {
+    // Si usas un <video id="…"> podrías buscarlo y detenerlo:
+    const el = document.getElementById(options.playerId || '') as HTMLVideoElement;
+    if (el) {
+      el.pause();
+      el.remove();
+    }
+    // Devuelve siempre un capVideoPlayerResult válido
+    return {
+      method: 'removePlayer',
+      result: true
+    };
+  }
+  /**
    * Return if a given playerId is playing
    *
    * @param options

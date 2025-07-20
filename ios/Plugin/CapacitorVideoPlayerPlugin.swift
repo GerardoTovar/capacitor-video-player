@@ -1,6 +1,6 @@
+import AVKit
 import Foundation
 import Capacitor
-import AVKit
 import UIKit
 
 /**
@@ -11,6 +11,7 @@ import UIKit
 // swiftlint:disable file_length
 // swiftlint:disable type_body_length
 public class CapacitorVideoPlayerPlugin: CAPPlugin {
+    var embeddedPlayers: [String: (AVPlayer, AVPlayerLayer)] = [:]
     public var call: CAPPluginCall?
     public var videoPlayer: AVPlayerViewController?
     public var bgPlayer: AVPlayer?
@@ -40,25 +41,27 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
     var vpInternalObserver: Any?
     let rateList: [Float] = [0.25, 0.5, 0.75, 1.0, 2.0, 4.0]
 
-    override public func load() {
+
+    @objc override public func load() {
+        super.load()    // ① Llama primero a super
+
+        // ② Registra aquí TODOS tus métodos expuestos a JS
+        CAPBridge.registerPluginMethod("initPlayer",   self, #selector(initPlayer(_:)))
+        CAPBridge.registerPluginMethod("play",         self, #selector(play(_:)))
+        CAPBridge.registerPluginMethod("pause",        self, #selector(pause(_:)))
+        CAPBridge.registerPluginMethod("stop",         self, #selector(stop(_:)))
+        CAPBridge.registerPluginMethod("removePlayer", self, #selector(removePlayer(_:)))
+
+        // ③ Tu código actual de observers y PIP
         self.addObserversToNotificationCenter()
-        if (UIDevice.current.userInterfaceIdiom == UIUserInterfaceIdiom.pad),
-           #available(iOS 13.0, *) {
+        if UIDevice.current.userInterfaceIdiom == .pad,
+        #available(iOS 13.0, *) {
             isPIPModeAvailable = true
         } else if #available(iOS 14.0, *) {
             isPIPModeAvailable = true
         }
     }
-    deinit {
-        NotificationCenter.default.removeObserver(playObserver as Any)
-        NotificationCenter.default.removeObserver(pauseObserver as Any)
-        NotificationCenter.default.removeObserver(endObserver as Any)
-        NotificationCenter.default.removeObserver(readyObserver as Any)
-        NotificationCenter.default.removeObserver(fsDismissObserver as Any)
-        NotificationCenter.default.removeObserver(backgroundObserver as Any)
-        NotificationCenter.default.removeObserver(foregroundObserver as Any)
-        NotificationCenter.default.removeObserver(vpInternalObserver as Any)
-    }
+
 
     @objc func echo(_ call: CAPPluginCall) {
         let value = call.getString("value") ?? ""
@@ -235,13 +238,55 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
                     artwork: artwork)
 
             }
-        } else {
-            call.resolve([ "result": false,
-                           "method": "initPlayer",
-                           "message": "Not implemented"])
+        } else if mode == "embedded" {
+            guard let urlStr = call.getString("url"),
+                    let videoURL = URL(string: urlStr) else {
+                call.reject("Debe indicar una URL válida")
+                return
+            }
+            let placement = call.getObject("placement") ?? [:]
+            let x      = placement["x"]      as? CGFloat ?? 0
+            let y      = placement["y"]      as? CGFloat ?? 0
+            let width  = placement["width"]  as? CGFloat ?? 200
+            let height = placement["height"] as? CGFloat ?? 150
+
+            // 1) Crear player y capa
+            let player = AVPlayer(url: videoURL)
+            let playerLayer = AVPlayerLayer(player: player)
+            playerLayer.frame = CGRect(x: x, y: y, width: width, height: height)
+            playerLayer.videoGravity = .resizeAspect
+
+            // 2) Añadir al view principal
+            DispatchQueue.main.async {
+                self.bridge?.viewController?.view.layer.addSublayer(playerLayer)
+                player.play()
+                // 3) Resolver
+                call.resolve([
+                "method": "initPlayer",
+                "result": true
+                ])
+                // 4) Guardar referencias para poder pausar/detener luego
+                self.embeddedPlayers[playerId] = (player, playerLayer)
+            }
             return
         }
+
     }
+
+    @objc func removePlayer(_ call: CAPPluginCall) {
+        guard let playerId = call.getString("playerId") else {
+            call.reject("Debe indicar playerId"); return
+        }
+        guard let entry = embeddedPlayers[playerId] else {
+            call.reject("No existe ningún player con id \(playerId)"); return
+        }
+        let (player, layer) = entry
+        player.pause()
+        DispatchQueue.main.async { layer.removeFromSuperlayer() }
+        embeddedPlayers.removeValue(forKey: playerId)
+        call.resolve(["method": "removePlayer", "result": true])
+    }
+
     // swiftlint:enable function_body_length
     // swiftlint:enable cyclomatic_complexity
 

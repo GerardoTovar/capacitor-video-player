@@ -256,8 +256,26 @@ public class CapacitorVideoPlayerPlugin extends Plugin {
               _initPlayer(call);
             }
         } else if ("embedded".equals(mode)) {
-            ret.put("message", "Embedded Mode not implemented");
-            call.resolve(ret);
+            // 1) Obtener parámetros
+            JSObject placement = call.getObject("placement");
+            int width  = placement.getInteger("width",  ViewGroup.LayoutParams.MATCH_PARENT);
+            int height = placement.getInteger("height", ViewGroup.LayoutParams.MATCH_PARENT);
+            int x      = placement.getInteger("x", 0);
+            int y      = placement.getInteger("y", 0);
+            // 2) Inflar el contenedor embedded
+            bridge.getActivity().runOnUiThread(() -> {
+            ViewGroup root = (ViewGroup) bridge.getActivity()
+                .findViewById(android.R.id.content);
+            FrameLayout container = (FrameLayout) LayoutInflater.from(getContext())
+                .inflate(R.layout.video_player_embedded_container, root, false);
+            FrameLayout.LayoutParams params = new FrameLayout.LayoutParams(width, height);
+            params.leftMargin = x;
+            params.topMargin  = y;
+            container.setLayoutParams(params);
+            root.addView(container);
+            // 3) Inicializar ExoPlayer dentro del container
+            implementation.initEmbeddedPlayer(call, playerId, url, container);
+            });
             return;
         }
     }

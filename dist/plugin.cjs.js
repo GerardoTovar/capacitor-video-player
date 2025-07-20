@@ -3,9 +3,32 @@
 var core = require('@capacitor/core');
 var Hls = require('hls.js');
 
-const CapacitorVideoPlayer = core.registerPlugin('CapacitorVideoPlayer', {
+const NativeVideoPlayer = core.registerPlugin('CapacitorVideoPlayer', {
     web: () => Promise.resolve().then(function () { return web; }).then(m => new m.CapacitorVideoPlayerWeb()),
 });
+// Reemplazamos el export directo por un objeto que:
+//  1) “Heredamos” todos los métodos nativos con …NativeVideoPlayer
+//  2) Sobrescribimos initPlayer para inyectar placement
+//  3) Exponemos removePlayer
+const CapacitorVideoPlayer = Object.assign(Object.assign({}, NativeVideoPlayer), { initPlayer(options) {
+        const initOpts = {
+            mode: options.mode,
+            url: options.url,
+            playerId: options.playerId,
+        };
+        if (options.mode === 'embedded' && options.placement) {
+            initOpts.placement = {
+                x: options.placement.x,
+                y: options.placement.y,
+                width: options.placement.width,
+                height: options.placement.height,
+            };
+        }
+        return NativeVideoPlayer.initPlayer(initOpts);
+    },
+    removePlayer(options) {
+        return NativeVideoPlayer.removePlayer(options);
+    } });
 
 const videoTypes = {
     mp4: 'video/mp4',
@@ -422,6 +445,22 @@ class CapacitorVideoPlayerWeb extends core.WebPlugin {
                 message: 'Must provide a Mode either fullscreen or embedded)',
             });
         }
+    }
+    /**
+     * Limpia un player embedded en web (o hace el “stub” si no aplica).
+     */
+    async removePlayer(options) {
+        // Si usas un <video id="…"> podrías buscarlo y detenerlo:
+        const el = document.getElementById(options.playerId || '');
+        if (el) {
+            el.pause();
+            el.remove();
+        }
+        // Devuelve siempre un capVideoPlayerResult válido
+        return {
+            method: 'removePlayer',
+            result: true
+        };
     }
     /**
      * Return if a given playerId is playing

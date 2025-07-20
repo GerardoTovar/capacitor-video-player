@@ -19,6 +19,10 @@ export declare class CapacitorVideoPlayerWeb extends WebPlugin implements Capaci
      */
     initPlayer(options: capVideoPlayerOptions): Promise<capVideoPlayerResult>;
     /**
+     * Limpia un player embedded en web (o hace el “stub” si no aplica).
+     */
+    removePlayer(options: capVideoPlayerIdOptions): Promise<capVideoPlayerResult>;
+    /**
      * Return if a given playerId is playing
      *
      * @param options

@@ -99,6 +99,8 @@ export interface CapacitorVideoPlayerPlugin {
      */
     addListener(event: 'jeepCapVideoPlayerExit', callback: (e: capVideoListenerExit) => void): Promise<PluginListenerHandle>;
     removeAllListeners(): Promise<void>;
+    /** Elimina un player embedded (iOS/Android) */
+    removePlayer(options: capVideoPlayerIdOptions): Promise<capVideoPlayerResult>;
 }
 export interface capEchoOptions {
     /**
@@ -110,9 +112,9 @@ export interface capVideoPlayerOptions {
     /**
      * Player mode
      *  - "fullscreen"
-     *  - "embedded" (Web only)
+     *  - "embedded" (Web, iOS y Android)
      */
-    mode?: string;
+    mode?: 'fullscreen' | 'embedded';
     /**
      * The url of the video to play
      */
@@ -216,6 +218,15 @@ export interface capVideoPlayerOptions {
      * default: ""
      */
     artwork?: string;
+    /**
+     * Posición y tamaño del contenedor embedded (x, y, width, height)
+     */
+    placement?: {
+        x: number;
+        y: number;
+        width: number;
+        height: number;
+    };
 }
 export interface capVideoPlayerIdOptions {
     /**
@@ -318,5 +329,13 @@ export interface SubTitleOptions {
      * Font Size in pixels (default 16)
      */
     fontSize?: number;
+}
+export interface InitPlayerResult {
+    method: 'initPlayer';
+    result: boolean;
+}
+export interface RemovePlayerResult {
+    method: 'removePlayer';
+    result: boolean;
 }
 export type VideoEventName = 'jeepCapVideoPlayerReady' | 'jeepCapVideoPlayerPlay' | 'jeepCapVideoPlayerPause' | 'jeepCapVideoPlayerEnded';

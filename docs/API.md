@@ -25,6 +25,7 @@
 * [`addListener(VideoEventName, ...)`](#addlistenervideoeventname-)
 * [`addListener('jeepCapVideoPlayerExit', ...)`](#addlistenerjeepcapvideoplayerexit-)
 * [`removeAllListeners()`](#removealllisteners)
+* [`removePlayer(...)`](#removeplayer)
 * [Interfaces](#interfaces)
 * [Type Aliases](#type-aliases)
 
@@ -518,6 +519,23 @@ removeAllListeners() => Promise<void>
 --------------------
 
 
+### removePlayer(...)
+
+```typescript
+removePlayer(options: capVideoPlayerIdOptions) => Promise<capVideoPlayerResult>
+```
+
+Elimina un player embedded (iOS/Android)
+
+| Param         | Type                                                                        |
+| ------------- | --------------------------------------------------------------------------- |
+| **`options`** | <code><a href="#capvideoplayeridoptions">capVideoPlayerIdOptions</a></code> |
+
+**Returns:** <code>Promise&lt;<a href="#capvideoplayerresult">capVideoPlayerResult</a>&gt;</code>
+
+--------------------
+
+
 ### Interfaces
 
 
@@ -540,30 +558,31 @@ removeAllListeners() => Promise<void>
 
 #### capVideoPlayerOptions
 
-| Prop                  | Type                                                        | Description                                                                                                                                                 |
-| --------------------- | ----------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **`mode`**            | <code>string</code>                                         | Player mode - "fullscreen" - "embedded" (Web only)                                                                                                          |
-| **`url`**             | <code>string</code>                                         | The url of the video to play                                                                                                                                |
-| **`subtitle`**        | <code>string</code>                                         | The url of subtitle associated with the video                                                                                                               |
-| **`language`**        | <code>string</code>                                         | The language of subtitle see https://github.com/libyal/libfwnt/wiki/Language-Code-identifiers                                                               |
-| **`subtitleOptions`** | <code><a href="#subtitleoptions">SubTitleOptions</a></code> | SubTitle Options                                                                                                                                            |
-| **`playerId`**        | <code>string</code>                                         | Id of DIV Element parent of the player                                                                                                                      |
-| **`rate`**            | <code>number</code>                                         | Initial playing rate                                                                                                                                        |
-| **`exitOnEnd`**       | <code>boolean</code>                                        | Exit on VideoEnd (iOS, Android) default: true                                                                                                               |
-| **`loopOnEnd`**       | <code>boolean</code>                                        | Loop on VideoEnd when exitOnEnd false (iOS, Android) default: false                                                                                         |
-| **`pipEnabled`**      | <code>boolean</code>                                        | Picture in Picture Enable (iOS, Android) default: true                                                                                                      |
-| **`bkmodeEnabled`**   | <code>boolean</code>                                        | Background Mode Enable (iOS, Android) default: true                                                                                                         |
-| **`showControls`**    | <code>boolean</code>                                        | Show Controls Enable (iOS, Android) default: true                                                                                                           |
-| **`displayMode`**     | <code>string</code>                                         | Display Mode ["all", "portrait", "landscape"] (iOS, Android) default: "all"                                                                                 |
-| **`componentTag`**    | <code>string</code>                                         | Component Tag or DOM Element Tag (React app)                                                                                                                |
-| **`width`**           | <code>number</code>                                         | Player Width (mode "embedded" only)                                                                                                                         |
-| **`height`**          | <code>number</code>                                         | Player height (mode "embedded" only)                                                                                                                        |
-| **`headers`**         | <code>{ [key: string]: string; }</code>                     | Headers for the request (iOS, Android) by Manuel García Marín (https://github.com/PhantomPainX)                                                             |
-| **`title`**           | <code>string</code>                                         | Title shown in the player (Android) by Manuel García Marín (https://github.com/PhantomPainX)                                                                |
-| **`smallTitle`**      | <code>string</code>                                         | Subtitle shown below the title in the player (Android) by Manuel García Marín (https://github.com/PhantomPainX)                                             |
-| **`accentColor`**     | <code>string</code>                                         | ExoPlayer Progress Bar and Spinner color (Android) by Manuel García Marín (https://github.com/PhantomPainX) Must be a valid hex color code default: #FFFFFF |
-| **`chromecast`**      | <code>boolean</code>                                        | Chromecast enable/disable (Android) by Manuel García Marín (https://github.com/PhantomPainX) default: true                                                  |
-| **`artwork`**         | <code>string</code>                                         | Artwork url to be shown in Chromecast player by Manuel García Marín (https://github.com/PhantomPainX) default: ""                                           |
+| Prop                  | Type                                                                  | Description                                                                                                                                                 |
+| --------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **`mode`**            | <code>'fullscreen' \| 'embedded'</code>                               | Player mode - "fullscreen" - "embedded" (Web, iOS y Android)                                                                                                |
+| **`url`**             | <code>string</code>                                                   | The url of the video to play                                                                                                                                |
+| **`subtitle`**        | <code>string</code>                                                   | The url of subtitle associated with the video                                                                                                               |
+| **`language`**        | <code>string</code>                                                   | The language of subtitle see https://github.com/libyal/libfwnt/wiki/Language-Code-identifiers                                                               |
+| **`subtitleOptions`** | <code><a href="#subtitleoptions">SubTitleOptions</a></code>           | SubTitle Options                                                                                                                                            |
+| **`playerId`**        | <code>string</code>                                                   | Id of DIV Element parent of the player                                                                                                                      |
+| **`rate`**            | <code>number</code>                                                   | Initial playing rate                                                                                                                                        |
+| **`exitOnEnd`**       | <code>boolean</code>                                                  | Exit on VideoEnd (iOS, Android) default: true                                                                                                               |
+| **`loopOnEnd`**       | <code>boolean</code>                                                  | Loop on VideoEnd when exitOnEnd false (iOS, Android) default: false                                                                                         |
+| **`pipEnabled`**      | <code>boolean</code>                                                  | Picture in Picture Enable (iOS, Android) default: true                                                                                                      |
+| **`bkmodeEnabled`**   | <code>boolean</code>                                                  | Background Mode Enable (iOS, Android) default: true                                                                                                         |
+| **`showControls`**    | <code>boolean</code>                                                  | Show Controls Enable (iOS, Android) default: true                                                                                                           |
+| **`displayMode`**     | <code>string</code>                                                   | Display Mode ["all", "portrait", "landscape"] (iOS, Android) default: "all"                                                                                 |
+| **`componentTag`**    | <code>string</code>                                                   | Component Tag or DOM Element Tag (React app)                                                                                                                |
+| **`width`**           | <code>number</code>                                                   | Player Width (mode "embedded" only)                                                                                                                         |
+| **`height`**          | <code>number</code>                                                   | Player height (mode "embedded" only)                                                                                                                        |
+| **`headers`**         | <code>{ [key: string]: string; }</code>                               | Headers for the request (iOS, Android) by Manuel García Marín (https://github.com/PhantomPainX)                                                             |
+| **`title`**           | <code>string</code>                                                   | Title shown in the player (Android) by Manuel García Marín (https://github.com/PhantomPainX)                                                                |
+| **`smallTitle`**      | <code>string</code>                                                   | Subtitle shown below the title in the player (Android) by Manuel García Marín (https://github.com/PhantomPainX)                                             |
+| **`accentColor`**     | <code>string</code>                                                   | ExoPlayer Progress Bar and Spinner color (Android) by Manuel García Marín (https://github.com/PhantomPainX) Must be a valid hex color code default: #FFFFFF |
+| **`chromecast`**      | <code>boolean</code>                                                  | Chromecast enable/disable (Android) by Manuel García Marín (https://github.com/PhantomPainX) default: true                                                  |
+| **`artwork`**         | <code>string</code>                                                   | Artwork url to be shown in Chromecast player by Manuel García Marín (https://github.com/PhantomPainX) default: ""                                           |
+| **`placement`**       | <code>{ x: number; y: number; width: number; height: number; }</code> | Posición y tamaño del contenedor embedded (x, y, width, height)                                                                                             |
 
 
 #### SubTitleOptions

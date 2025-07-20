@@ -377,6 +377,25 @@
         "docs": "",
         "complexTypes": [],
         "slug": "removealllisteners"
+      },
+      {
+        "name": "removePlayer",
+        "signature": "(options: capVideoPlayerIdOptions) => Promise<capVideoPlayerResult>",
+        "parameters": [
+          {
+            "name": "options",
+            "docs": "",
+            "type": "capVideoPlayerIdOptions"
+          }
+        ],
+        "returns": "Promise<capVideoPlayerResult>",
+        "tags": [],
+        "docs": "Elimina un player embedded (iOS/Android)",
+        "complexTypes": [
+          "capVideoPlayerResult",
+          "capVideoPlayerIdOptions"
+        ],
+        "slug": "removeplayer"
       }
     ],
     "properties": []
@@ -445,9 +464,9 @@
         {
           "name": "mode",
           "tags": [],
-          "docs": "Player mode\n - \"fullscreen\"\n - \"embedded\" (Web only)",
+          "docs": "Player mode\n - \"fullscreen\"\n - \"embedded\" (Web, iOS y Android)",
           "complexTypes": [],
-          "type": "string | undefined"
+          "type": "'fullscreen' | 'embedded' | undefined"
         },
         {
           "name": "url",
@@ -597,6 +616,13 @@
           "docs": "Artwork url to be shown in Chromecast player\nby Manuel García Marín (https://github.com/PhantomPainX)\ndefault: \"\"",
           "complexTypes": [],
           "type": "string | undefined"
+        },
+        {
+          "name": "placement",
+          "tags": [],
+          "docs": "Posición y tamaño del contenedor embedded (x, y, width, height)",
+          "complexTypes": [],
+          "type": "{ x: number; y: number; width: number; height: number; } | undefined"
         }
       ]
     },
