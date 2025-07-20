@@ -17,7 +17,9 @@ var capacitorCapacitorVideoPlayer = (function (exports, core, Hls) {
     };
 
     class VideoPlayer {
-        constructor(_mode, _url, _playerId, _videoRate, _videoExitOnEnd, _videoLoopOnEnd, _container, _zIndex, _width = 320, _height = 180) {
+        constructor(_mode, _url, _playerId, _videoRate, _videoExitOnEnd, _videoLoopOnEnd, _container, _zIndex, 
+        // _width/_height are no longer used for sizing; kept here only for SVG viewBox if desired
+        _width = 320, _height = 180) {
             this._mode = _mode;
             this._url = _url;
             this._playerId = _playerId;
@@ -44,25 +46,30 @@ var capacitorCapacitorVideoPlayer = (function (exports, core, Hls) {
             }
             // 1) estilos base del contenedor
             this._applyContainerStyles();
-            // 2) svg póster negro
+            // 2) svg póster negro (full bleed if desired)
             const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
             svg.setAttribute('viewBox', `0 0 ${this._width} ${this._height}`);
-            svg.innerHTML = `<rect width="${this._width}" height="${this._height}" fill="#000"/>`;
+            svg.innerHTML = `<rect width="100%" height="100%" fill="#000"/>`;
+            svg.style.position = 'absolute';
+            svg.style.top = '0';
+            svg.style.left = '0';
+            svg.style.width = '100%';
+            svg.style.height = '100%';
             svg.style.zIndex = `${this._zIndex + 1}`;
             this._container.appendChild(svg);
             // 3) contenedor interno para el video
-            const heightVideo = Math.floor((this._width * this._height) / this._width);
             this._videoContainer = document.createElement('div');
             Object.assign(this._videoContainer.style, {
                 position: 'absolute',
+                top: '0',
                 left: '0',
-                width: `${this._width}px`,
-                height: `${heightVideo}px`,
+                width: '100%',
+                height: '100%',
                 zIndex: `${this._zIndex + 2}`,
             });
             this._container.appendChild(this._videoContainer);
             // 4) crea y configura elemento <video>
-            const created = await this._createVideoElement(this._width, heightVideo);
+            const created = await this._createVideoElement();
             if (!created) {
                 this._createEvent('Exit', this._playerId, 'Video Error: failed to create the Video Element');
             }
@@ -83,19 +90,20 @@ var capacitorCapacitorVideoPlayer = (function (exports, core, Hls) {
         _applyContainerStyles() {
             Object.assign(this._container.style, {
                 position: this._mode === 'fullscreen' ? 'absolute' : 'relative',
-                width: this._mode === 'fullscreen' ? '100vw' : `${this._width}px`,
-                height: this._mode === 'fullscreen' ? '100vh' : `${this._height}px`,
-                left: '0',
+                width: this._mode === 'fullscreen' ? '100vw' : '100%',
+                height: this._mode === 'fullscreen' ? '100vh' : '100%',
                 top: '0',
+                left: '0',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 backgroundColor: '#000',
                 zIndex: `${this._zIndex}`,
+                overflow: 'hidden',
             });
         }
         /** Crea el elemento <video> y engancha HLS o MP4 */
-        async _createVideoElement(width, height) {
+        async _createVideoElement() {
             this.videoEl = document.createElement('video');
             Object.assign(this.videoEl, {
                 controls: true,
@@ -105,9 +113,13 @@ var capacitorCapacitorVideoPlayer = (function (exports, core, Hls) {
             this.videoEl.setAttribute('webkit-playsinline', 'true');
             this.videoEl.setAttribute('playsinline', 'true');
             Object.assign(this.videoEl.style, {
+                position: 'absolute',
+                top: '0',
+                left: '0',
+                width: '100%',
+                height: '100%',
                 zIndex: `${this._zIndex + 3}`,
-                width: `${width}px`,
-                height: `${height}px`,
+                objectFit: 'contain',
             });
             this._videoContainer.appendChild(this.videoEl);
             const ok = await this._setupSourceAndListeners();
@@ -159,7 +171,6 @@ var capacitorCapacitorVideoPlayer = (function (exports, core, Hls) {
                 this.videoEl.addEventListener('leavepictureinpicture', () => {
                     var _a;
                     this.pipMode = false;
-                    // Solo reingresa a fullscreen si el modo original era fullscreen
                     if (this._mode === 'fullscreen' && !this._isEnded) {
                         this._goFullscreen();
                     }
@@ -208,23 +219,18 @@ var capacitorCapacitorVideoPlayer = (function (exports, core, Hls) {
                 this._container.webkitRequestFullscreen();
             }
         }
-        /** Sale de fullscreen, sin lanzar errores si no estás en ese modo */
+        /** Sale de fullscreen sin lanzar error si no estabas ahí */
         _exitFullscreen() {
             var _a;
             try {
-                // Standard
                 if (document.fullscreenElement) {
                     (_a = document.exitFullscreen()) === null || _a === void 0 ? void 0 : _a.catch(() => { });
                 }
-                // WebKit (Safari / WKWebView)
                 else if (document.webkitExitFullscreen) {
                     document.webkitExitFullscreen();
                 }
             }
-            catch (e) {
-                // ignoramos cualquier excepción
-                console.debug('No estaba en fullscreen', e);
-            }
+            catch ( /* ignorado */_b) { /* ignorado */ }
         }
         // —————— Eventos de video ——————
         _onEnded() {
@@ -273,11 +279,9 @@ var capacitorCapacitorVideoPlayer = (function (exports, core, Hls) {
             const s = this._url;
             const dotRe = new RegExp(`\\.(${Object.keys(videoTypes).join('|')})`, 'i');
             const queryRe = new RegExp(`=(${Object.keys(videoTypes).join('|')})`, 'i');
-            let m = dotRe.exec(s) || queryRe.exec(s);
-            if (m) {
+            const m = dotRe.exec(s) || queryRe.exec(s);
+            if (m)
                 return videoTypes[m[1]];
-            }
-            // por defecto MP4
             return 'video/mp4';
         }
     }

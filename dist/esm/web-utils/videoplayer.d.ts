@@ -33,7 +33,7 @@ export declare class VideoPlayer {
     private _addExitButton;
     /** Solicita fullscreen */
     private _goFullscreen;
-    /** Sale de fullscreen, sin lanzar errores si no estás en ese modo */
+    /** Sale de fullscreen sin lanzar error si no estabas ahí */
     private _exitFullscreen;
     private _onEnded;
     private _onReady;
