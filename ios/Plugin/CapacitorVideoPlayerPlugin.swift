@@ -7,7 +7,7 @@ import UIKit
  * Please read the Capacitor iOS Plugin Development Guide
  * here: https://capacitorjs.com/docs/plugins/ios
  */
-@objc(CapacitorVideoPlayerPlugin)
+@objc(CapacitorVideoPlayer)
 // swiftlint:disable file_length
 // swiftlint:disable type_body_length
 public class CapacitorVideoPlayerPlugin: CAPPlugin {
