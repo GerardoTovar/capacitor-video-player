@@ -1,4 +1,4 @@
-import { registerPlugin, Capacitor } from '@capacitor/core';
+import { registerPlugin } from '@capacitor/core';
 import type {
   CapacitorVideoPlayerPlugin,
   capVideoPlayerOptions,
