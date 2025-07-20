@@ -238,10 +238,10 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
                 return
             }
             let placement = call.getObject("placement") ?? [:]
-            let x      = placement["x"]      as? CGFloat ?? 0
-            let y      = placement["y"]      as? CGFloat ?? 0
-            let width  = placement["width"]  as? CGFloat ?? 200
-            let height = placement["height"] as? CGFloat ?? 150
+            let x      = CGFloat(call.getDouble("placement.x") ?? 0)
+            let y      = CGFloat(call.getDouble("placement.y") ?? 0)
+            let width  = CGFloat(call.getDouble("placement.width") ?? 200)
+            let height = CGFloat(call.getDouble("placement.height") ?? 150)
 
             // 1) Crear player y capa
             let player = AVPlayer(url: videoURL)
@@ -255,8 +255,8 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
                 player.play()
                 // 3) Resolver
                 call.resolve([
-                "method": "initPlayer",
-                "result": true
+                    "method": "initPlayer",
+                    "result": true
                 ])
                 // 4) Guardar referencias para poder pausar/detener luego
                 self.embeddedPlayers[playerId] = (player, playerLayer)
@@ -269,6 +269,19 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
     @objc func removePlayer(_ call: CAPPluginCall) {
         guard let playerId = call.getString("playerId") else {
             call.reject("Debe indicar playerId"); return
+        }
+        // --- Nuevo: si estamos en fullscreen, despedimos el controlador ---
+        if self.mode == "fullscreen", playerId == self.fsPlayerId {
+            DispatchQueue.main.async {
+                // videoPlayerFullScreenView es tu AVPlayerViewController personalizado
+                self.videoPlayerFullScreenView?.dismiss(animated: true) {
+                    call.resolve([
+                        "method": "removePlayer",
+                        "result": true
+                    ])
+                }
+            }
+            return
         }
         guard let entry = embeddedPlayers[playerId] else {
             call.reject("No existe ningún player con id \(playerId)"); return
