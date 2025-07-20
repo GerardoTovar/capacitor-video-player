@@ -252,9 +252,10 @@ class VideoPlayer {
                 this.videoEl.addEventListener('leavepictureinpicture', () => {
                     this.pipMode = false;
                     if (!this._isEnded) {
-                        this._goFullscreen();
-                        if (this.videoEl != null)
+                        // ya no volvemos a fullscreen
+                        if (this.videoEl != null) {
                             this.videoEl.play();
+                        }
                     }
                 });
             }
