@@ -166,7 +166,7 @@ export class VideoPlayer {
         if (this._mode === 'fullscreen' && !this._isEnded) {
           this._goFullscreen();
         }
-        this.videoEl.play().catch(() => {});
+        this.videoEl?.play().catch(() => {});
       });
     });
   }
@@ -217,13 +217,20 @@ export class VideoPlayer {
     }
   }
 
-  /** Sale de fullscreen */
-  private _exitFullscreen() {
-    const doc: any = document;
-    if (doc.exitFullscreen) {
-      doc.exitFullscreen();
-    } else if (doc.webkitExitFullscreen) {
-      doc.webkitExitFullscreen();
+  /** Sale de fullscreen, sin lanzar errores si no estás en ese modo */
+  private _exitFullscreen(): void {
+    try {
+      // Standard
+      if (document.fullscreenElement) {
+        document.exitFullscreen()?.catch(() => {/* ignoramos el error */});
+      }
+      // WebKit (Safari / WKWebView)
+      else if ((document as any).webkitExitFullscreen) {
+        (document as any).webkitExitFullscreen();
+      }
+    } catch (e) {
+      // ignoramos cualquier excepción
+      console.debug('No estaba en fullscreen', e);
     }
   }
 

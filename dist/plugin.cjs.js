@@ -159,12 +159,13 @@ class VideoPlayer {
                 this._exitFullscreen();
             });
             this.videoEl.addEventListener('leavepictureinpicture', () => {
+                var _a;
                 this.pipMode = false;
                 // Solo reingresa a fullscreen si el modo original era fullscreen
                 if (this._mode === 'fullscreen' && !this._isEnded) {
                     this._goFullscreen();
                 }
-                this.videoEl.play().catch(() => { });
+                (_a = this.videoEl) === null || _a === void 0 ? void 0 : _a.play().catch(() => { });
             });
         });
     }
@@ -209,14 +210,22 @@ class VideoPlayer {
             this._container.webkitRequestFullscreen();
         }
     }
-    /** Sale de fullscreen */
+    /** Sale de fullscreen, sin lanzar errores si no estás en ese modo */
     _exitFullscreen() {
-        const doc = document;
-        if (doc.exitFullscreen) {
-            doc.exitFullscreen();
+        var _a;
+        try {
+            // Standard
+            if (document.fullscreenElement) {
+                (_a = document.exitFullscreen()) === null || _a === void 0 ? void 0 : _a.catch(() => { });
+            }
+            // WebKit (Safari / WKWebView)
+            else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
         }
-        else if (doc.webkitExitFullscreen) {
-            doc.webkitExitFullscreen();
+        catch (e) {
+            // ignoramos cualquier excepción
+            console.debug('No estaba en fullscreen', e);
         }
     }
     // —————— Eventos de video ——————
