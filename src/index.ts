@@ -39,9 +39,7 @@ export const CapacitorVideoPlayer: CapacitorVideoPlayerPlugin = {
   },
 
   removePlayer(options: capVideoPlayerIdOptions): Promise<capVideoPlayerResult> {
-    if ((options as any).mode === 'embedded') {
-      return new CapacitorVideoPlayerWeb().removePlayer(options);
-    }
+    // iOS will just dismiss whatever player is up
     return NativeVideoPlayer.removePlayer(options);
   },
 };

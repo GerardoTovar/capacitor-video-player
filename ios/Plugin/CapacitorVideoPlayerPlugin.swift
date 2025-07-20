@@ -41,7 +41,6 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
     var vpInternalObserver: Any?
     let rateList: [Float] = [0.25, 0.5, 0.75, 1.0, 2.0, 4.0]
 
-
     @objc override public func load() {
         super.load()    // ① Llama primero a super
 
@@ -267,41 +266,35 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
     }
 
     @objc func removePlayer(_ call: CAPPluginCall) {
-        guard let playerId = call.getString("playerId") else {
-            call.reject("Debe indicar playerId")
-            return
-        }
-        let playerId = call.getString("playerId") ?? "fullscreen"
-
-        // 1) Try fullscreen dismissal
-        if playerId == fsPlayerId, let playerVC = videoPlayerFullScreenView {
-            DispatchQueue.main.async {
-                playerVC.dismiss(animated: true) {
-                call.resolve([
-                    "method": "removePlayer",
-                    "result": true
-                ])
-                }
-            }
+        // 1) Extraemos el playerId
+        guard let playerId = call.getString("playerId"), !playerId.isEmpty else {
+            call.reject("removePlayer: must supply a non-empty playerId")
             return
         }
 
-        // 2) Try embedded cleanup
-        if let (container, layer) = embeddedPlayers[playerId] {
+        // 2) Buscamos la tupla (AVPlayer, AVPlayerLayer)
+        guard let (player, layer) = embeddedPlayers[playerId] else {
+            call.reject("removePlayer: no player found for id \(playerId)")
+            return
+        }
+
+        // 3) Paramos el AVPlayer y quitamos la capa de la vista
+        player.pause()
+        DispatchQueue.main.async {
             layer.removeFromSuperlayer()
-            embeddedPlayers.removeValue(forKey: playerId)
-            call.resolve([
-                "method": "removePlayer",
-                "result": true
-            ])
-            return
         }
-        // 3) Nothing to remove
+
+        // 4) Eliminamos la entrada del diccionario
+        embeddedPlayers.removeValue(forKey: playerId)
+
+        // 5) Respondemos a JS
         call.resolve([
             "method": "removePlayer",
-            "result": false
+            "playerId": playerId,
+            "result": true
         ])
     }
+
 
     // swiftlint:enable function_body_length
     // swiftlint:enable cyclomatic_complexity

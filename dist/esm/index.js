@@ -22,9 +22,7 @@ export const CapacitorVideoPlayer = Object.assign(Object.assign({}, NativeVideoP
         return NativeVideoPlayer.pause(options);
     },
     removePlayer(options) {
-        if (options.mode === 'embedded') {
-            return new CapacitorVideoPlayerWeb().removePlayer(options);
-        }
+        // iOS will just dismiss whatever player is up
         return NativeVideoPlayer.removePlayer(options);
     } });
 export * from './definitions';
