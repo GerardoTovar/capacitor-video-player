@@ -3,6 +3,7 @@ import Foundation
 import Capacitor
 import UIKit
 
+
 /**
  * Please read the Capacitor iOS Plugin Development Guide
  * here: https://capacitorjs.com/docs/plugins/ios
