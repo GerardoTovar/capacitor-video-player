@@ -265,34 +265,37 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
 
     }
 
-    @objc func removePlayer(_ call: CAPPluginCall) {
-        // 1) Extraemos el playerId
-        guard let playerId = call.getString("playerId"), !playerId.isEmpty else {
-            call.reject("removePlayer: must supply a non-empty playerId")
+    @ @objc func removePlayer(_ call: CAPPluginCall) {
+        // 2) ¿Es un embedded?
+        if let (player, layer) = embeddedPlayers[playerId] {
+            // Detén y quita la capa
+            player.pause()
+            DispatchQueue.main.async {
+                layer.removeFromSuperlayer()
+            }
+            embeddedPlayers.removeValue(forKey: playerId)
+            call.resolve([
+                "method": "removePlayer",
+                "playerId": playerId,
+                "result": true
+            ])
             return
         }
-
-        // 2) Buscamos la tupla (AVPlayer, AVPlayerLayer)
-        guard let (player, layer) = embeddedPlayers[playerId] else {
-            call.reject("removePlayer: no player found for id \(playerId)")
+        // 3) ¿O es el fullscreen?
+        if playerId == fsPlayerId, let full = videoPlayerFullScreenView {
+            DispatchQueue.main.async {
+                full.dismiss(animated: true) {
+                    call.resolve([
+                        "method": "removePlayer",
+                        "playerId": playerId,
+                        "result": true
+                    ])
+                }
+            }
             return
         }
-
-        // 3) Paramos el AVPlayer y quitamos la capa de la vista
-        player.pause()
-        DispatchQueue.main.async {
-            layer.removeFromSuperlayer()
-        }
-
-        // 4) Eliminamos la entrada del diccionario
-        embeddedPlayers.removeValue(forKey: playerId)
-
-        // 5) Respondemos a JS
-        call.resolve([
-            "method": "removePlayer",
-            "playerId": playerId,
-            "result": true
-        ])
+        // 4) Ni embedded ni fullscreen
+        call.reject("removePlayer: no player found for id \(playerId)")
     }
 
 
