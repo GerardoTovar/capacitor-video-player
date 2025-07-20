@@ -45,13 +45,6 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
     @objc override public func load() {
         super.load()    // ① Llama primero a super
 
-        // ② Registra aquí TODOS tus métodos expuestos a JS
-        CAPBridge.registerPluginMethod("initPlayer",   self, #selector(initPlayer(_:)))
-        CAPBridge.registerPluginMethod("play",         self, #selector(play(_:)))
-        CAPBridge.registerPluginMethod("pause",        self, #selector(pause(_:)))
-        CAPBridge.registerPluginMethod("stop",         self, #selector(stop(_:)))
-        CAPBridge.registerPluginMethod("removePlayer", self, #selector(removePlayer(_:)))
-
         // ③ Tu código actual de observers y PIP
         self.addObserversToNotificationCenter()
         if UIDevice.current.userInterfaceIdiom == .pad,
@@ -275,16 +268,23 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
 
     @objc func removePlayer(_ call: CAPPluginCall) {
         guard let playerId = call.getString("playerId") else {
-            call.reject("Debe indicar playerId"); return
+            call.reject("Debe indicar playerId")
+            return
         }
-        guard let entry = embeddedPlayers[playerId] else {
-            call.reject("No existe ningún player con id \(playerId)"); return
+        if let (player, layer) = embeddedPlayers[playerId] {
+            player.pause()
+            DispatchQueue.main.async { layer.removeFromSuperlayer() }
+            embeddedPlayers.removeValue(forKey: playerId)
+            call.resolve([
+            "method": "removePlayer",
+            "result": true
+            ])
+        } else {
+            call.resolve([
+            "method": "removePlayer",
+            "result": false
+            ])
         }
-        let (player, layer) = entry
-        player.pause()
-        DispatchQueue.main.async { layer.removeFromSuperlayer() }
-        embeddedPlayers.removeValue(forKey: playerId)
-        call.resolve(["method": "removePlayer", "result": true])
     }
 
     // swiftlint:enable function_body_length
