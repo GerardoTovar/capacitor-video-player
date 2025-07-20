@@ -271,20 +271,36 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
             call.reject("Debe indicar playerId")
             return
         }
-        if let (player, layer) = embeddedPlayers[playerId] {
-            player.pause()
-            DispatchQueue.main.async { layer.removeFromSuperlayer() }
+        let playerId = call.getString("playerId") ?? "fullscreen"
+
+        // 1) Try fullscreen dismissal
+        if playerId == fsPlayerId, let playerVC = videoPlayerFullScreenView {
+            DispatchQueue.main.async {
+                playerVC.dismiss(animated: true) {
+                call.resolve([
+                    "method": "removePlayer",
+                    "result": true
+                ])
+                }
+            }
+            return
+        }
+
+        // 2) Try embedded cleanup
+        if let (container, layer) = embeddedPlayers[playerId] {
+            layer.removeFromSuperlayer()
             embeddedPlayers.removeValue(forKey: playerId)
             call.resolve([
-            "method": "removePlayer",
-            "result": true
+                "method": "removePlayer",
+                "result": true
             ])
-        } else {
-            call.resolve([
+            return
+        }
+        // 3) Nothing to remove
+        call.resolve([
             "method": "removePlayer",
             "result": false
-            ])
-        }
+        ])
     }
 
     // swiftlint:enable function_body_length

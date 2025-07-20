@@ -60,5 +60,15 @@ enum CapacitorVideoPlayerError: Error {
         return videoPickerViewController
 
     }
-    // swiftlint:enable function_parameter_count
+
+    @objc public func removePlayer() {
+        DispatchQueue.main.async {
+            if let pvc = UIApplication.shared
+                            .keyWindow?
+                            .rootViewController?
+                            .presentedViewController {
+                pvc.dismiss(animated: true, completion: nil)
+            }
+        }
+    }
 }
