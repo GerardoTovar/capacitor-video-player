@@ -229,7 +229,6 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
                     title: title,
                     smallTitle: smallTitle,
                     artwork: artwork)
-                return
 
             }
         } else if mode == "embedded" {
@@ -268,50 +267,17 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
     }
 
     @objc func removePlayer(_ call: CAPPluginCall) {
-        // 1) Validación de playerId
-        guard let playerId = call.getString("playerId"), !playerId.isEmpty else {
-            print("⚠️ removePlayer: falta playerId")
-            call.reject("removePlayer: debe indicar un playerId válido")
-            return
+        guard let playerId = call.getString("playerId") else {
+            call.reject("Debe indicar playerId"); return
         }
-        print("ℹ️ removePlayer llamado con playerId: \(playerId)")
-
-        // 2) Si existe en embeddedPlayers → pausar, eliminar capa y notificar
-        if let (player, layer) = embeddedPlayers[playerId] {
-            print("✔️ removePlayer: encontrado embedded player \(playerId)")
-            player.pause()
-            DispatchQueue.main.async {
-                layer.removeFromSuperlayer()
-            }
-            embeddedPlayers.removeValue(forKey: playerId)
-            call.resolve([
-                "method": "removePlayer",
-                "playerId": playerId,
-                "result": true,
-                "debug": "removed embedded player"
-            ])
-            return
+        guard let entry = embeddedPlayers[playerId] else {
+            call.reject("No existe ningún player con id \(playerId)"); return
         }
-
-        // 3) Si coincide con el fullscreen activo → hacer dismiss
-        if playerId == fsPlayerId, let fullVC = videoPlayerFullScreenView {
-            print("✔️ removePlayer: dismiss fullscreen player \(playerId)")
-            DispatchQueue.main.async {
-                fullVC.dismiss(animated: true) {
-                    call.resolve([
-                        "method": "removePlayer",
-                        "playerId": playerId,
-                        "result": true,
-                        "debug": "dismissed fullscreen player"
-                    ])
-                }
-            }
-            return
-        }
-
-        // 4) No se encontró nada
-        print("❌ removePlayer: no existe ningún player con id \(playerId)")
-        call.reject("removePlayer: no existe ningún player con id \(playerId)")
+        let (player, layer) = entry
+        player.pause()
+        DispatchQueue.main.async { layer.removeFromSuperlayer() }
+        embeddedPlayers.removeValue(forKey: playerId)
+        call.resolve(["method": "removePlayer", "result": true])
     }
 
     // swiftlint:enable function_body_length
