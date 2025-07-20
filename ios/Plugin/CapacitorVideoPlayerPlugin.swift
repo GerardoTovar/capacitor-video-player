@@ -266,17 +266,42 @@ public class CapacitorVideoPlayerPlugin: CAPPlugin {
     }
 
     @objc func removePlayer(_ call: CAPPluginCall) {
-        guard let playerId = call.getString("playerId") else {
-            call.reject("Debe indicar playerId"); return
+        guard let playerId = call.getString("playerId"), !playerId.isEmpty else {
+            call.reject("removePlayer: debe indicar un playerId válido")
+            return
         }
-        guard let entry = embeddedPlayers[playerId] else {
-            call.reject("No existe ningún player con id \(playerId)"); return
+        
+        // 2) Si existe en embeddedPlayers → detener y quitar capa
+        if let (player, layer) = embeddedPlayers[playerId] {
+            player.pause()
+            DispatchQueue.main.async {
+                layer.removeFromSuperlayer()
+            }
+            embeddedPlayers.removeValue(forKey: playerId)
+            call.resolve([
+                "method": "removePlayer",
+                "playerId": playerId,
+                "result": true
+            ])
+            return
         }
-        let (player, layer) = entry
-        player.pause()
-        DispatchQueue.main.async { layer.removeFromSuperlayer() }
-        embeddedPlayers.removeValue(forKey: playerId)
-        call.resolve(["method": "removePlayer", "result": true])
+
+        // 3) Si coincide con el fullscreen activo → dismiss del AVPlayerViewController
+        if playerId == fsPlayerId, let fullVC = videoPlayerFullScreenView {
+            DispatchQueue.main.async {
+                fullVC.dismiss(animated: true) {
+                    call.resolve([
+                        "method": "removePlayer",
+                        "playerId": playerId,
+                        "result": true
+                    ])
+                }
+            }
+            return
+        }
+
+        // 4) Si no se encontró nada
+        call.reject("removePlayer: no existe ningún player con id \(playerId)")
     }
 
     // swiftlint:enable function_body_length
